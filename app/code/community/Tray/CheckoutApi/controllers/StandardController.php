@@ -313,7 +313,6 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
                     
                     $comment = $cod_status . ' - ' . $transaction['status_name'];
 
-                    $cod_status = 6;
                     switch ($cod_status){
                         case 4: 
                         case 5:
