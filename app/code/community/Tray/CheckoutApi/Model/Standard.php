@@ -202,11 +202,16 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         if (!filter_var($billingAddress->getData("email"), FILTER_VALIDATE_EMAIL)) {
             $errorMsg .= "E-mail em branco ou inválido!!\n";
         }
+        
         // Validação do telefone do cliente
-        $number_contact = substr(str_replace(" ","",str_replace("(","",str_replace(")","",str_replace("-","",$shippingAddress->getTelephone())))),0,2) . substr(str_replace(" ","",str_replace("-","",$shippingAddress->getTelephone())),-8);
+        $number_contact = str_replace(" ","",$shippingAddress->getTelephone());
+        $number_contact = str_replace("(","",$number_contact);
+        $number_contact = str_replace(")","",$number_contact);
+        $number_contact = str_replace("-","",$number_contact);
         if (preg_match('/[a-zA-Z]/',$number_contact)) {
             $errorMsg .= "Telefone em branco ou inválido!!\n";
         }
+        
         // Verificação se consta o endereço do cliente
         if (str_replace(" ","",$shippingAddress->getStreet(1)) == "") {
             $errorMsg .= "Endereço em branco ou inválido!!\n";
@@ -347,15 +352,42 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         $shipping_description = $order->getData('shipping_description');
         
         $sArr = array();
-        $number_contact = substr(str_replace(" ","",str_replace("(","",str_replace(")","",str_replace("-","",$a->getTelephone())))),0,2) . substr(str_replace(" ","",str_replace("-","",$a->getTelephone())),-8);
-
+        
+        //$number_contact = substr(str_replace(" ","",str_replace("(","",str_replace(")","",str_replace("-","",$a->getTelephone())))),0,2) . substr(str_replace(" ","",str_replace("-","",$a->getTelephone())),-8);
+        /*if (preg_match('/^0800[0-9]{6,7}$|^0300[0-9]{6,7}$/',$a->getTelephone())) {
+            $number_contact = str_replace(" ","",$a->getTelephone());
+            $number_contact = str_replace("(","",$number_contact);
+            $number_contact = str_replace(")","",$number_contact);
+            $number_contact = str_replace("-","",$number_contact);
+        }else{
+            $number_contact = str_replace(" ","",$a->getTelephone());
+            $number_contact = str_replace("(","",$number_contact);
+            $number_contact = str_replace(")","",$number_contact);
+            $number_contact = str_replace("-","",$number_contact);
+            //$number_contact = substr($number_contact,0,2) . substr($number_contact,-8);
+        }*/
+        $number_contact = str_replace(" ","",$a->getTelephone());
+        $number_contact = str_replace("(","",$number_contact);
+        $number_contact = str_replace(")","",$number_contact);
+        $number_contact = str_replace("-","",$number_contact);
+        
+        if (preg_match('/^[0-9]{2}[5-9]{1}[0-9]{7,8}$/',$number_contact)) {
+            $type_contact = "M";
+        }
+        if (preg_match('/^[0-9]{2}[1-6]{1}[0-9]{7}$/',$number_contact)) {
+            $type_contact = "H";
+        }
+        if (preg_match('/^0800[0-9]{6,7}$|^0300[0-9]{6,7}$/',$number_contact)) {
+            $type_contact = "W";
+        }
+        
 	$sArr['token_account']= $this->getConfigData('token');
         $sArr['transaction[order_number]']= $this->getConfigData('prefixo').$orderIncrementId;
 
     	$sArr['customer[name]']= $order->getData("customer_firstname") . ' ' . str_replace("(pj)", "", $order->getData("customer_lastname"));
     	$sArr['customer[cpf]']= $order->getData("customer_taxvat");
         $sArr['customer[contacts][][number_contact]']= $number_contact;
-        $sArr['customer[contacts][][type_contact]']= "H"; 
+        $sArr['customer[contacts][][type_contact]']= $type_contact; 
         $sArr['customer[email]']= $a->getEmail();
         
         // Endereço de Entrega
@@ -514,8 +546,8 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
     }
     
     function updateTransactionTrayCheckout($transactionTc){
-        
-        $order = Mage::getModel('sales/order')->loadByIncrementId($transactionTc->order_number);
+       
+        $order = Mage::getModel('sales/order')->loadByIncrementId(str_replace($this->getConfigData('prefixo'),'',$transactionTc->order_number));
         $quote = Mage::getModel('sales/quote')->load($order->getData("quote_id"));
         
         $quote->getPayment()->setData("traycheckout_transaction_id", $transactionTc->transaction_id);

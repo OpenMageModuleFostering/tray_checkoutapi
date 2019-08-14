@@ -16,19 +16,5 @@
  * @package    Tray_CheckoutApi
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+$installer = $this;
 
-class Tray_CheckoutApi_Model_Standard extends Tray_CheckoutApi_Model_Standard
-{
-    protected $_code  = 'checkoutapi_standard';
-    
-    protected $_formBlockType = 'checkoutapi/form_standard';
-    
-    protected $_blockType = 'checkoutapi/standard';
-    
-    protected $_infoBlockType = 'checkoutapi/info_standard';
-    
-    public function getOrderPlaceRedirectUrl()
-    {
-        return Mage::getUrl('checkoutapi/standard/payment', array('_secure' => true, 'type' => 'standard'));
-    }
-}
