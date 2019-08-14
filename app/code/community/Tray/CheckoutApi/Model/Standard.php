@@ -129,9 +129,23 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         if (!($data instanceof Varien_Object)) {
             $data = new Varien_Object($data);
         }
-        //var_dump($data->getCcType());
+
+        $paymentMethod = "";
+
+        switch ($data->getMethod()) {
+            case 'traycheckoutapi':
+                $paymentMethod = $data->getTraycheckoutPaymentCodeCreditcard();
+                break;
+            case 'traycheckoutapi_onlinetransfer':
+                $paymentMethod = $data->getTraycheckoutPaymentCodeTef();
+                break;
+            case 'traycheckoutapi_bankslip':
+                $paymentMethod = $data->getTraycheckoutPaymentCodeBankslip();
+                break;
+        }
+
         $info = $this->getInfoInstance();
-        $info->setCcType($data->getCcType())
+        $info->setCcType($paymentMethod)
              ->setCcOwner($data->getCcOwner())
              ->setCcLast4(substr($data->getCcNumber(), -4))
              ->setCcNumber($data->getCcNumber())
@@ -286,7 +300,8 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         }
         
         $ccType = $quote->getPayment()->getData('cc_type');
-        $ccNumber = $quote->getPayment()->getData('cc_number');
+        //$ccNumber = $quote->getPayment()->getData('cc_number');
+        $ccNumber = str_replace(" ","",$quote->getPayment()->getData('cc_number'));
         //var_dump($quote->getPayment()->getData());
         if(!in_array($ccType, array("2","6","7","14","22","23"))){
             if ($this->validateCcNum($ccNumber)) {
@@ -478,7 +493,7 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         $sArr['payment[payment_method_id]'] = $order->getPayment()->getData('cc_type');
         $sArr['payment[split]'] = (($order->getPayment()->getData('traycheckout_split_number') == NULL)|| ($order->getPayment()->getData('traycheckout_split_number') == '0') ? '1' : $order->getPayment()->getData('traycheckout_split_number'));
         $sArr['payment[card_name]'] = $order->getPayment()->getData('cc_owner');
-        $sArr['payment[card_number]'] = $this->decrypt($order->getPayment()->getData('cc_number_enc'));
+        $sArr['payment[card_number]'] = str_replace(" ","",$this->decrypt($order->getPayment()->getData('cc_number_enc')));
         $sArr['payment[card_expdate_month]'] = $order->getPayment()->getData('cc_exp_month');
         $sArr['payment[card_expdate_year]'] = $order->getPayment()->getData('cc_exp_year');
         $sArr['payment[card_cvv]'] = $this->decrypt(Mage::getModel('sales/quote_payment')->load($order->getData("quote_id"),"quote_id")->getData("cc_cid_enc"));

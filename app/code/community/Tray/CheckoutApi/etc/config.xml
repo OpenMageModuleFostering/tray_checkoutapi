@@ -21,7 +21,7 @@
 <config>
     <modules>
         <Tray_CheckoutApi>
-            <version>1.2.1</version>
+            <version>1.2.2</version>
         </Tray_CheckoutApi>
     </modules>
     <global>
@@ -127,6 +127,15 @@
                 <traycheckout_split_value>
                     <to_order_payment>*</to_order_payment>
                 </traycheckout_split_value>
+                <traycheckout_payment_code_creditcard>
+                    <to_order_payment>*</to_order_payment>
+                </traycheckout_payment_code_creditcard>
+                <traycheckout_payment_code_bankslip>
+                    <to_order_payment>*</to_order_payment>
+                </traycheckout_payment_code_bankslip>
+                <traycheckout_payment_code_tef>
+                    <to_order_payment>*</to_order_payment>
+                </traycheckout_payment_code_tef>
                 <traycheckout_token_transaction>
                     <to_order_payment>*</to_order_payment>
                 </traycheckout_token_transaction>
