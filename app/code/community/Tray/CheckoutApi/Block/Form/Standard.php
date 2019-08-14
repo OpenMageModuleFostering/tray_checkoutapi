@@ -49,4 +49,45 @@ class Tray_CheckoutApi_Block_Form_Standard extends Mage_Payment_Block_Form
         }
         return $years;
     }
+    
+    public function getSplitSimulate($totalValue = "0")
+    {
+        $tcStandard = Mage::getModel('checkoutapi/standard');
+        $tcNoSplitTaxRate = $tcStandard->getConfigData('tcNoSplitTaxRate');
+        
+        $tcNoSplitTaxRate = explode(",",$tcNoSplitTaxRate);
+        
+        $params = array(
+            "token_account" => $tcStandard->getConfigData('token'),
+            "payment_method_id" => "3",
+            "price" => $totalValue
+        );
+        
+        
+        if(sizeof($tcNoSplitTaxRate) > 1){
+            for($itc = 0; $itc < sizeof($tcNoSplitTaxRate);$itc++){
+                $params["splits[$itc][split_transaction]"] = $tcNoSplitTaxRate[$itc];
+                $params["splits[$itc][percentage]"] = $tcStandard->getConfigData('splitTax');
+            }
+        }else{
+            $params["splits[][split_transaction]"] = "1";
+            $params["splits[][percentage]"] = $tcStandard->getConfigData('splitTax');
+        }
+        
+        $params = preg_replace("/splits\%5B\d+\%5D/","splits%5B%5D", http_build_query($params));
+                
+        $tcResponse = simplexml_load_string($tcStandard->getTrayCheckoutRequest("/edge/seller_splits/simulate_split",$params));
+        $splitSimulate = array(""=>'Parcela(s)');
+        
+        for($iTc = 0; $iTc < (int)$tcStandard->getConfigData('tcQtdSplit'); $iTc++){
+            if($iTc < count($tcResponse->data_response->splittings->splitting)){
+                $splittings = $tcResponse->data_response->splittings->splitting[$iTc];
+                $splitSimulate[(int)$splittings->split] = (string)$splittings->split . " x de R$" . number_format((float)$splittings->value_split, 2, ',','');
+            }
+        }
+        
+        $this->setData('splitSimulate', $splitSimulate);
+        
+        return $splitSimulate;
+    }
 }

@@ -38,7 +38,6 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
     
     protected $errorTypeErrorTrayCheckout = '';
     
-    protected $notification  = 'standard';
     /**
      * Availability options
      */
@@ -94,16 +93,6 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
     {
         return $this->getCheckout()->getQuote();
     }
-    
-    /**
-     * Get singleton with checkout standard order transaction information
-     *
-     * @return Tray_CheckoutApi_Model_Api
-     */
-    public function getApi() 
-    {
-        return Mage::getSingleton($this->_blockType);
-    }
 
     /**
      * Using for multiple shipping address
@@ -129,7 +118,6 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         if (!($data instanceof Varien_Object)) {
             $data = new Varien_Object($data);
         }
-        //var_dump($data->getCcType());
         $info = $this->getInfoInstance();
         $info->setCcType($data->getCcType())
              ->setCcOwner($data->getCcOwner())
@@ -287,7 +275,6 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         
         $ccType = $quote->getPayment()->getData('cc_type');
         $ccNumber = $quote->getPayment()->getData('cc_number');
-        //var_dump($quote->getPayment()->getData());
         if(!in_array($ccType, array("2","6","7","14","22","23"))){
             if ($this->validateCcNum($ccNumber)) {
                 switch ($ccType){
@@ -412,8 +399,8 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
             $type_contact = "W";
         }
         
-	    $sArr['token_account']= $this->getConfigData('token');
-	    $sArr['transaction[free]']= "MAGENTO_API_v".(string) Mage::getConfig()->getNode()->modules->Tray_CheckoutApi->version;
+	$sArr['token_account']= $this->getConfigData('token');
+	$sArr['transaction[free]']= "MAGENTO_API_v".(string) Mage::getConfig()->getNode()->modules->Tray_CheckoutApi->version;
         $sArr['transaction[order_number]']= $this->getConfigData('prefixo').$orderIncrementId;
 
     	$sArr['customer[name]']= $order->getData("customer_firstname") . ' ' . str_replace("(pj)", "", $order->getData("customer_lastname"));
@@ -467,14 +454,8 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         
         $sArr['transaction[url_process]'] = Mage::getUrl('checkoutapi/standard/return',  array('_secure' => true));
         $sArr['transaction[url_success]'] = Mage::getUrl('checkoutapi/standard/return', array('_secure' => true));
-        $sArr['transaction[url_notification]'] = Mage::getUrl('checkoutapi/standard/success', array('_secure' => true, 'type' => $notification));
+        $sArr['transaction[url_notification]'] = Mage::getUrl('checkoutapi/standard/success', array('_secure' => true, 'type' => 'standard'));
         
-        //Exemplo de Afiliados
-        //$sArr['affiliates[0][account_email]'] = 'emailaffiliate1@devtray.com.br';
-        //$sArr['affiliates[0][percentage]'] = '20';
-        //$sArr['affiliates[1][account_email]'] = 'emailaffiliate2@devtray.com.br';
-        //$sArr['affiliates[1][percentage]'] = '15';
-                
         $sArr['payment[payment_method_id]'] = $order->getPayment()->getData('cc_type');
         $sArr['payment[split]'] = (($order->getPayment()->getData('traycheckout_split_number') == NULL)|| ($order->getPayment()->getData('traycheckout_split_number') == '0') ? '1' : $order->getPayment()->getData('traycheckout_split_number'));
         $sArr['payment[card_name]'] = $order->getPayment()->getData('cc_owner');
@@ -553,29 +534,10 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         $ch = curl_init ( $this->getTrayCheckoutUrl().$url );
         
         if(is_array($params)){
-            $params = http_build_query($params);
+            Mage::log('Data: '. http_build_query($params), null, 'traycheckout.log');
+        }else{
+            Mage::log('Data: '.  $params, null, 'traycheckout.log');
         }
-        //Mage::log('Data: '.  $params, null, 'traycheckout.log');
-        $patterns = array();
-        $patterns[0] = '/card_name%5D=[\w\W]*&payment%5Bcard_number/';
-        $patterns[1] = '/card_number%5D=\d+\D/';
-        $patterns[2] = '/card_expdate_month%5D=\d+\D/';
-        $patterns[3] = '/card_expdate_year%5D=\d+\D/';
-        $patterns[4] = '/card_cvv%5D=\d+/';
-        $replacements = array();
-        $replacements[0] = 'card_name%5D=&payment%5Bcard_number';
-        $replacements[1] = 'card_number%5D=';
-        $replacements[2] = 'card_expdate_month%5D=';
-        $replacements[3] = 'card_expdate_year%5D=';
-        $replacements[4] = 'card_cvv%5D=';
-
-        //$arrayp = array('%5B0%5D','%5B1%5D','%5B2%5D','%5B3%5D','%5B4%5D','%5B5%5D','%5B6%5D','%5B7%5D','%5B8%5D','%5B9%5D');
-        //$replace = ;
-        
-        $params = preg_replace('/%5B\d{1,3}%5D/', '%5B%5D', $params);
-        //$params = str_replace($arrayp, $replace, $params);
-        
-        Mage::log('Data: '.  preg_replace($patterns, $replacements,$params), null, 'traycheckout.log');
         
         curl_setopt ( $ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1 );
         curl_setopt ( $ch, CURLOPT_POST, 1 );
@@ -643,7 +605,6 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         $order->getPayment()->setData("traycheckout_token_transaction", $transactionTc->token_transaction);
         $order->getPayment()->setData("traycheckout_url_payment", $transactionTc->payment->url_payment);
         $order->getPayment()->setData("traycheckout_typeful_line", $transactionTc->payment->linha_digitavel);
-        $order->getPayment()->save();
         
         $cod_status = $transactionTc->status_id;
         $comment = "";
@@ -654,7 +615,6 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         if (isset($transactionTc->status_name)) {
             $comment .= " - " . $transactionTc->status_name;
         }
-        
         switch ($cod_status){
             case '4': 
             case '5':
@@ -665,57 +625,55 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
                     );
                 break;
             case '6':
-                    
                     $items = $order->getAllItems();
-                    
+
                     $thereIsVirtual = false;
-                    
+
                     foreach ($items as $itemId => $item) {
                         if ($item["is_virtual"] == "1" || $item["is_downloadable"] == "1") {
                             $thereIsVirtual = true;
                         }
                     }
-                    
+
                     // what to do - from admin
                     $toInvoice = $this->getApi()->getConfigData('acaopadraovirtual') == "1" ? true : false;
-                    
+
                     if ($thereIsVirtual && !$toInvoice) {
-                    
+
                         $frase = 'Tray - Aprovado. Pagamento (fatura) confirmado automaticamente.';
 
                         $order->addStatusToHistory(
-                                Mage_Sales_Model_Order::STATE_PROCESSING, 
+                                $order->getStatus(), //continue setting current order status
                                 Mage::helper('checkoutapi')->__($frase), true
                         );
-                    
+
                         $order->sendOrderUpdateEmail(true, $frase);
-                    
                     } else {
-                    
+
                         if (!$order->canInvoice()) {
                             $isHolded = ( $order->getStatus() == Mage_Sales_Model_Order::STATE_HOLDED );
 
-                            $status = ($isHolded) ? Mage_Sales_Model_Order::STATE_PROCESSING :  $order->getStatus();
-                            $frase  = ($isHolded) ? 'Tray - Aprovado. Confirmado automaticamente o pagamento do pedido.' : 'Erro ao criar pagamento (fatura).';
-                    
+                                                                    $status = ($isHolded) ? Mage_Sales_Model_Order::STATE_PROCESSING :  $order->getStatus();
+                                                                    $frase  = ($isHolded) ? 'Tray - Aprovado. Confirmado automaticamente o pagamento do pedido.' : 'Erro ao criar pagamento (fatura).';
+
                             //when order cannot create invoice, need to have some logic to take care
                             $order->addStatusToHistory(
                                 $status, //continue setting current order status
                                 Mage::helper('checkoutapi')->__( $frase )
                             );
-                    
+
                         } else {
-                    
+
                                     //need to save transaction id
                             $order->getPayment()->setTransactionId($dados_post['transaction']['transaction_id']);
-                    
+
                             //need to convert from order into invoice
                             $invoice = $order->prepareInvoice();
 
                             if ($this->getApi()->canCapture()) {
                                 $invoice->register()->capture();
                             }
-                    
+
                             Mage::getModel('core/resource_transaction')
                                     ->addObject($invoice)
                                     ->addObject($invoice->getOrder())

@@ -38,46 +38,6 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
        $this->renderLayout();
     }
     
-    public function returnconfigmoduleAction()
-    {
-        
-        $code = $this->getRequest()->getParam('code', false);
-        $customerKey = $this->getRequest()->getParam('CK', false);
-        $customerSecret = $this->getRequest()->getParam('CS', false);
-        $environment = $this->getRequest()->getParam('environment', false);
-        
-        $tcAuth = Mage::getModel('checkoutapi/auth');
-        $tcAuth->doAuthorization( $customerKey, $customerSecret, $code, $environment);
-        
-        $tcRequest = Mage::getModel('checkoutapi/request');
-        
-        //Mage::log($tcAuth, null, 'traycheckout.log');
-
-        $params["access_token"] = $tcAuth->access_token;
-        $params["url"] = Mage::getBaseUrl();
-        //var_dump($code,$customerKey,$customerSecret,$environment);
-        //var_dump($params);
-        $tcResponse = $tcRequest->requestData("v1/people/update",$params,$environment);
-        
-        if($tcResponse->message_response->message == "success"){
-            
-            $htmlId = "payment_traycheckoutapi";
-            $htmlId .= ($this->getRequest()->getParam("type") != "standard") ? "_".$this->getRequest()->getParam("type") : "";
-            
-            $script = "<script>";
-            $script .= "parent.document.getElementById('".$htmlId."_code').value = '$code';";
-            $script .= "parent.document.getElementById('".$htmlId."_customerKey').value = '$customerKey';";
-            $script .= "parent.document.getElementById('".$htmlId."_customerSecret').value = '$customerSecret';";
-            $script .= "parent.document.getElementById('".$htmlId."_token').value = '".$tcResponse->data_response->token_account."';";
-            $script .= "parent.configForm.submit();";
-            $script .= "";
-            $script .= "";
-            $script .= "</script>";
-            
-            echo $script;
-        }
-    }
-    
     public function paymentbackendAction() 
     {
         $this->loadLayout();
@@ -207,7 +167,7 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
         $_type = $this->getRequest()->getParam('type', false);
         $token = $this->getApi()->getConfigData('token');
 
-	    $urlPost = $this->getUrlPostCheckoutApi($this->getApi()->getConfigData('sandbox'));
+	$urlPost = $this->getUrlPostCheckoutApi($this->getApi()->getConfigData('sandbox'));
 
         $dados_post = $this->getRequest()->getPost();
          
@@ -290,11 +250,10 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
             $transaction = $arrResponse['data_response']['transaction'];
             $order_number = str_replace($this->getApi()->getConfigData('prefixo'),'',$transaction['order_number']);
             $order = Mage::getModel('sales/order');
-            $prefixo123 = $this->getApi()->getConfigData('prefixo');
 
             $order->loadByIncrementId($order_number);
             
-            echo "Prefixo: $prefixo123 | Pedido: $order_number - ID: ".$transaction['transaction_id'];
+            echo "Pedido: $order_number - ID: ".$transaction['transaction_id'];
             
             if ($order->getId()) {
 
@@ -312,8 +271,6 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
                     $cod_status = $transaction['status_id'];
                     
                     $comment = $cod_status . ' - ' . $transaction['status_name'];
-
-                    $cod_status = 6;
                     switch ($cod_status){
                         case 4: 
                         case 5:
@@ -390,13 +347,12 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
 									
                                     $frase = 'Tray - Aprovado. Pagamento (fatura) confirmado automaticamente.';
 
-                                    
                                     $order->addStatusToHistory(
-                                            Mage_Sales_Model_Order::STATE_PROCESSING, 
-                                            Mage::helper('checkoutapi')->__($frase), false
+                                            $order->getStatus(), //continue setting current order status
+                                            Mage::helper('checkoutapi')->__($frase), true
                                     );
 
-                                    //$order->sendOrderUpdateEmail(true, $frase);
+                                    $order->sendOrderUpdateEmail(true, $frase);
                                     
                                 }
                             //}
@@ -428,38 +384,6 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
                 $order->save();
             }
         }
-    }
-    
-    public function getsplitAction()
-    {
-        $tcStandard = Mage::getModel('checkoutapi/standard');
-        
-        Mage::log('Split Request: '.  $tcStandard->getConfigData('token'), null, 'traycheckout.log');
-        
-        $params = array(
-            "token_account" => $tcStandard->getConfigData('token'),
-            "price" => $this->getRequest()->getParam('price', false)
-        );
-        
-        $method =  $this->getRequest()->getParam('method', false);
-        
-        $tcResponse = simplexml_load_string($tcStandard->getTrayCheckoutRequest("/v1/transactions/simulate_splitting",$params));
-        
-        foreach ($tcResponse->data_response->payment_methods->payment_method as $payment_method){
-            if(intval($payment_method->payment_method_id) == intval($method)){
-                $splittings = $payment_method->splittings->splitting;
-                //echo "<p>Método: $payment_method->payment_method_id - $payment_method->payment_method_name </p>";
-            }
-        }
-        
-        
-        for($auxS = 0; $auxS < (int)$tcStandard->getConfigData('tcQtdSplit') && $auxS < sizeof($splittings); $auxS++){
-            $splitting = $splittings[$auxS];
-            $splitSimulate[(int)$splitting->split] = (string)$splitting->split . " x de R$" . number_format((float)$splitting->value_split, 2, ',','') . (((float)$splitting->split_rate == 0) ? " sem " : " com ") . "juros";
-        }
-        
-        echo json_encode($splitSimulate);
-        
     }
 
 }
