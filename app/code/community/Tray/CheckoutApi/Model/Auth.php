@@ -25,7 +25,7 @@ class Tray_CheckoutApi_Model_Auth extends Varien_Object
     public $access_token = "";
     public $refresh_token = "";
     
-    public function doAuthorization($consumer_key = "", $consumer_secret = "", $code = "")
+    public function doAuthorization($consumer_key = "", $consumer_secret = "", $code = "",$environment = "1")
     {
         
         $params["consumer_key"] = $consumer_key;
@@ -34,7 +34,7 @@ class Tray_CheckoutApi_Model_Auth extends Varien_Object
         
         $tcRequest = Mage::getModel('checkoutapi/request');
         
-        $tcResponse = $tcRequest->requestData($this->urlAccessToken,$params,"1");
+        $tcResponse = $tcRequest->requestData($this->urlAccessToken,$params,$environment);
         
         if($tcResponse->message_response->message == "success"){
             $this->access_token = $tcResponse->data_response->authorization->access_token;

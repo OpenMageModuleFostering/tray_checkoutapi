@@ -47,13 +47,14 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
         $environment = $this->getRequest()->getParam('environment', false);
         
         $tcAuth = Mage::getModel('checkoutapi/auth');
-        $tcAuth->doAuthorization( $customerKey, $customerSecret, $code);
+        $tcAuth->doAuthorization( $customerKey, $customerSecret, $code, $environment);
         
         $tcRequest = Mage::getModel('checkoutapi/request');
         
         $params["access_token"] = $tcAuth->access_token;
         $params["url"] = Mage::getBaseUrl();
-        
+        //var_dump($code,$customerKey,$customerSecret,$environment);
+        //var_dump($params);
         $tcResponse = $tcRequest->requestData("v1/people/update",$params,$environment);
         
         if($tcResponse->message_response->message == "success"){
