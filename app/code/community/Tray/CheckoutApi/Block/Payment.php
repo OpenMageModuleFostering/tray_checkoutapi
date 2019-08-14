@@ -63,6 +63,7 @@ class Tray_CheckoutApi_Block_Payment extends Mage_Core_Block_Template
         
         $response = $standard->getTrayCheckoutRequest("/v2/transactions/pay_complete",$standard->getCheckoutFormFields());
         
+        
         $xml = simplexml_load_string($response);
         $this->order_number = str_replace($standard->getConfigData('prefixo'),'',$xml->data_response->transaction->order_number);
         $this->transaction_id = $xml->data_response->transaction->transaction_id;

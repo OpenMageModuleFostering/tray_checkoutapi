@@ -1,7 +1,6 @@
 
-function openModalTray(url, txtTitle)
+function openModalTc(url, txtTitle)
 {
-    var _url = checkoutapi_baseurl + url;
     
     if(txtTitle === null || txtTitle === '') {
         txtTitle = 'Validação das informações do Anúncio';
@@ -9,7 +8,7 @@ function openModalTray(url, txtTitle)
     winCompare = new Window({
         className:'magento',
         title:txtTitle,
-        url:_url,
+        url:url,
         width:820,
         height:600,
         minimizable:false,

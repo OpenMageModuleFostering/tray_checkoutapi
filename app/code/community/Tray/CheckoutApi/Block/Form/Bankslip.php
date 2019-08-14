@@ -16,15 +16,16 @@
  * @package    Tray_CheckoutApi
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-?>
-<fieldset class="form-list">
-    <?php 
-          $_code = $this->getMethodCode();
-          $_standardPD = Mage::getSingleton('checkoutapi/standard');
-          
-          $totals = Mage::getSingleton('adminhtml/session_quote')->getQuote()->collectTotals();  
-    ?>
-    <ul id="payment_form_<?php echo $_code ?>" style="display:none">
-        <ul class="forma_pagamento"></ul>
-    </ul>
-</fieldset>
+
+class Tray_CheckoutApi_Block_Form_Bankslip extends Mage_Payment_Block_Form
+{
+    protected function _construct()
+    {
+        $this->setTemplate('tray/checkoutapi/form/bankslip.phtml');
+        parent::_construct();
+    }
+    protected function _getConfig()
+    {
+        return Mage::getSingleton('payment/config');
+    }
+}

@@ -93,6 +93,16 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
     {
         return $this->getCheckout()->getQuote();
     }
+    
+    /**
+     * Get singleton with checkout standard order transaction information
+     *
+     * @return Tray_CheckoutApi_Model_Api
+     */
+    public function getApi() 
+    {
+        return Mage::getSingleton($this->_blockType);
+    }
 
     /**
      * Using for multiple shipping address
@@ -605,6 +615,7 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         $order->getPayment()->setData("traycheckout_token_transaction", $transactionTc->token_transaction);
         $order->getPayment()->setData("traycheckout_url_payment", $transactionTc->payment->url_payment);
         $order->getPayment()->setData("traycheckout_typeful_line", $transactionTc->payment->linha_digitavel);
+        $order->getPayment()->save();
         
         $cod_status = $transactionTc->status_id;
         $comment = "";
@@ -615,6 +626,7 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         if (isset($transactionTc->status_name)) {
             $comment .= " - " . $transactionTc->status_name;
         }
+        
         switch ($cod_status){
             case '4': 
             case '5':
@@ -625,55 +637,57 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
                     );
                 break;
             case '6':
+                    
                     $items = $order->getAllItems();
-
+                    
                     $thereIsVirtual = false;
-
+                    
                     foreach ($items as $itemId => $item) {
                         if ($item["is_virtual"] == "1" || $item["is_downloadable"] == "1") {
                             $thereIsVirtual = true;
                         }
                     }
-
+                    
                     // what to do - from admin
                     $toInvoice = $this->getApi()->getConfigData('acaopadraovirtual') == "1" ? true : false;
-
+                    
                     if ($thereIsVirtual && !$toInvoice) {
-
+                    
                         $frase = 'Tray - Aprovado. Pagamento (fatura) confirmado automaticamente.';
 
                         $order->addStatusToHistory(
                                 $order->getStatus(), //continue setting current order status
                                 Mage::helper('checkoutapi')->__($frase), true
                         );
-
+                    
                         $order->sendOrderUpdateEmail(true, $frase);
+                    
                     } else {
-
+                    
                         if (!$order->canInvoice()) {
                             $isHolded = ( $order->getStatus() == Mage_Sales_Model_Order::STATE_HOLDED );
 
-                                                                    $status = ($isHolded) ? Mage_Sales_Model_Order::STATE_PROCESSING :  $order->getStatus();
-                                                                    $frase  = ($isHolded) ? 'Tray - Aprovado. Confirmado automaticamente o pagamento do pedido.' : 'Erro ao criar pagamento (fatura).';
-
+                            $status = ($isHolded) ? Mage_Sales_Model_Order::STATE_PROCESSING :  $order->getStatus();
+                            $frase  = ($isHolded) ? 'Tray - Aprovado. Confirmado automaticamente o pagamento do pedido.' : 'Erro ao criar pagamento (fatura).';
+                    
                             //when order cannot create invoice, need to have some logic to take care
                             $order->addStatusToHistory(
                                 $status, //continue setting current order status
                                 Mage::helper('checkoutapi')->__( $frase )
                             );
-
+                    
                         } else {
-
+                    
                                     //need to save transaction id
                             $order->getPayment()->setTransactionId($dados_post['transaction']['transaction_id']);
-
+                    
                             //need to convert from order into invoice
                             $invoice = $order->prepareInvoice();
 
                             if ($this->getApi()->canCapture()) {
                                 $invoice->register()->capture();
                             }
-
+                    
                             Mage::getModel('core/resource_transaction')
                                     ->addObject($invoice)
                                     ->addObject($invoice->getOrder())

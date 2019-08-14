@@ -38,6 +38,43 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
        $this->renderLayout();
     }
     
+    public function returnconfigmoduleAction()
+    {
+        
+        $code = $this->getRequest()->getParam('code', false);
+        $customerKey = $this->getRequest()->getParam('CK', false);
+        $customerSecret = $this->getRequest()->getParam('CS', false);
+        $environment = $this->getRequest()->getParam('environment', false);
+        
+        $tcAuth = Mage::getModel('checkoutapi/auth');
+        $tcAuth->doAuthorization( $customerKey, $customerSecret, $code);
+        
+        $tcRequest = Mage::getModel('checkoutapi/request');
+        
+        $params["access_token"] = $tcAuth->access_token;
+        $params["url"] = Mage::getBaseUrl();
+        
+        $tcResponse = $tcRequest->requestData("v1/people/update",$params,$environment);
+        
+        if($tcResponse->message_response->message == "success"){
+            
+            $htmlId = "payment_traycheckoutapi";
+            $htmlId .= ($this->getRequest()->getParam("type") != "standard") ? "_".$this->getRequest()->getParam("type") : "";
+            
+            $script = "<script>";
+            $script .= "parent.document.getElementById('".$htmlId."_code').value = '$code';";
+            $script .= "parent.document.getElementById('".$htmlId."_customerKey').value = '$customerKey';";
+            $script .= "parent.document.getElementById('".$htmlId."_customerSecret').value = '$customerSecret';";
+            $script .= "parent.document.getElementById('".$htmlId."_token').value = '".$tcResponse->data_response->token_account."';";
+            $script .= "parent.configForm.submit();";
+            $script .= "";
+            $script .= "";
+            $script .= "</script>";
+            
+            echo $script;
+        }
+    }
+    
     public function paymentbackendAction() 
     {
         $this->loadLayout();

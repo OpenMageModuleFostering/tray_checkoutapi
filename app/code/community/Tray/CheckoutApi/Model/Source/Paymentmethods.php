@@ -30,11 +30,8 @@ class Tray_CheckoutApi_Model_Source_Paymentmethods
             array('value' => '16', 'label'=>Mage::helper('adminhtml')->__('Elo')),
             array('value' => '15', 'label'=>Mage::helper('adminhtml')->__('Discover')),
             array('value' => '19', 'label'=>Mage::helper('adminhtml')->__('JCB')),
-            array('value' => '14', 'label'=>Mage::helper('adminhtml')->__('Peela')),
-            array('value' => '7', 'label'=>Mage::helper('adminhtml')->__('Itaú Shopline (Transferência)')),
-            array('value' => '22', 'label'=>Mage::helper('adminhtml')->__('Transf. Online Bradesco')),
-            array('value' => '23', 'label'=>Mage::helper('adminhtml')->__('Transf. Online Banco do Brasil')),
-            array('value' => '6', 'label'=>Mage::helper('adminhtml')->__('Boleto Bancário')),
+            array('value' => '20', 'label'=>Mage::helper('adminhtml')->__('Hiper')),
+            array('value' => '25', 'label'=>Mage::helper('adminhtml')->__('Hipercard')),
         );
     }
 }
