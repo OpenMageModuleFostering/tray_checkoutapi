@@ -27,7 +27,7 @@
           $strTcPaymentMethods = $_standardPD->getConfigData("tcPaymentMethods");
           
           if($strTcPaymentMethods == "" || $strTcPaymentMethods == null){
-              $tctPaymentMethods = explode(",","14,7,22,23,21");
+              $tctPaymentMethods = explode(",","14,7,22,23");
           }else{
               $tctPaymentMethods = explode(",",$strTcPaymentMethods);
           }
@@ -78,7 +78,6 @@
                                 case 14: $imgSrc = "peela";break;
                                 case 22: $imgSrc = "bradesco";break;
                                 case 23: $imgSrc = "bb";break;
-                                case 21: $imgSrc = "hsbc";break;
                             }
                     ?>
                         <li class="tcPaymentMethod">

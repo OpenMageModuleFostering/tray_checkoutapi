@@ -34,7 +34,7 @@ class Tray_CheckoutApi_Model_Observer extends Varien_Object
 //        }
     }
     
-    public function cancelOrderTrayCheckout(Varien_Event_Observer $observer) {
+    /*public function cancelOrderTrayCheckout(Varien_Event_Observer $observer) {
         $order = $observer->getOrder();
         
         $paymentMethod = str_replace(array("payment_","_configButtom"),"",$order->getPayment()->getData('method'));
@@ -85,13 +85,12 @@ class Tray_CheckoutApi_Model_Observer extends Varien_Object
             }
 
             if (count($tracking) > 0) {
-                $tcAuth = Mage::getModel('checkoutapi/auth');
-                $tcAuth->doAuthorization( $configTc->getConfigData("customerKey"), $configTc->getConfigData("customerSecret"), $configTc->getConfigData("code"), $configTc->getConfigData("sandbox"));
+                //$tcAuth->doAuthorization( $configTc->getConfigData("customerKey"), $configTc->getConfigData("customerSecret"), $configTc->getConfigData("code"), $configTc->getConfigData("sandbox"));
 
                 $tcRequest = Mage::getModel('checkoutapi/request');
             
                 $params["token_account"] = $configTc->getConfigData('token');
-                $params["access_token"] = $tcAuth->access_token;
+                //$params["access_token"] = $tcAuth->access_token;
                 $params["order_number"] = $configTc->getConfigData('prefixo') . $order->getIncrementId();
                 $params["code"] = $tracking['number'];
                 $params["date_posting"] = date("d/m/Y",strtotime($shipment->getCreatedAt()));
@@ -114,6 +113,6 @@ class Tray_CheckoutApi_Model_Observer extends Varien_Object
             //$params["transaction_id"] = $order->getPayment()->getData("traycheckout_token_transaction");
         }
         
-    }
+    }*/
 
 }

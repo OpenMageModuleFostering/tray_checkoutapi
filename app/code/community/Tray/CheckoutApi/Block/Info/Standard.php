@@ -35,9 +35,9 @@ class Tray_CheckoutApi_Block_Info_Standard extends Mage_Payment_Block_Info
             $hash = Mage::getModel('core/encryption')->encrypt($incrementid . ":" . $quoteid);
             $method = $_order->getPayment()->getMethod();
             
-            Mage::log($_order->getCustomerId(), null, 'traycheckout.log');
-            Mage::log(Mage::getModel('checkoutapi/payment')->getPayment(), null, 'traycheckout.log');
-            Mage::log('Chamada: ', null, 'traycheckout.log');
+            //Mage::log($_order->getCustomerId(), null, 'traycheckout.log');
+            //Mage::log(Mage::getModel('checkoutapi/payment')->getPayment(), null, 'traycheckout.log');
+            //Mage::log('Chamada: ', null, 'traycheckout.log');
             
             if ($method == "traycheckoutapi" && ($_order->getStatus() == Mage_Sales_Model_Order::STATE_PENDING_PAYMENT )){
                 return '<span>Para efetuar o pagamento, <a href="' . Mage::getBaseUrl() . 'checkoutapi/standard/paymentbackend/order/' . $hash . '">clique aqui</a>.</span>';

@@ -21,20 +21,9 @@ class Tray_CheckoutApi_Block_Adminhtml_System_Config_Fieldset_Hidden extends Mag
 {   
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
-        $id = $element->getHtmlId();
         
-        $html = sprintf('
-            <tr id="row_payment_traycheckoutapi_%s" >
-                <td class="value" colspan="4">
-                    <input id="%s" name="%s" value="%s" class="input-text" type="hidden" >
-                </td>
-            </tr>',
-            $element->getHtmlId(), $element->getHtmlId(), $element->getName(), $element->getValue()
-        );
                 
-        $html .= <<<HTML
-        
-HTML;
+        $html = "";
         
         return $html;
     }

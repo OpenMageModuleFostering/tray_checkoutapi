@@ -26,7 +26,6 @@ class Tray_CheckoutApi_Model_Source_Tefpaymentmethods
             array('value' => '7', 'label'=>Mage::helper('adminhtml')->__('Itaú Shopline (Transferência)')),
             array('value' => '22', 'label'=>Mage::helper('adminhtml')->__('Transf. Online Bradesco')),
             array('value' => '23', 'label'=>Mage::helper('adminhtml')->__('Transf. Online Banco do Brasil')),
-            array('value' => '21', 'label'=>Mage::helper('adminhtml')->__('Transf. Online HSBC')),
         );
     }
 }

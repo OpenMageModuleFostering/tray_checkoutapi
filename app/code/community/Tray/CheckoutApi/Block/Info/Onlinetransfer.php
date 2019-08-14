@@ -35,9 +35,9 @@ class Tray_CheckoutApi_Block_Info_Onlinetransfer extends Mage_Payment_Block_Info
             $hash = Mage::getModel('core/encryption')->encrypt($incrementid . ":" . $quoteid);
             $method = $_order->getPayment()->getMethod();
             
-            Mage::log($_order->getCustomerId(), null, 'traycheckout.log');
-            Mage::log(Mage::getModel('checkoutapi/payment')->getPayment(), null, 'traycheckout.log');
-            Mage::log('Chamada: ', null, 'traycheckout.log');
+            //Mage::log($_order->getCustomerId(), null, 'traycheckout.log');
+            //Mage::log(Mage::getModel('checkoutapi/payment')->getPayment(), null, 'traycheckout.log');
+            //Mage::log('Chamada: ', null, 'traycheckout.log');
             
             if ($method == "traycheckoutapi_onlinetransfer" && (($_order->getStatus() == Mage_Sales_Model_Order::STATE_PENDING_PAYMENT ) || ($_order->getStatus() == 'pending' ))){
                 return '<span><button onclick="window.open(\''.$_order->getPayment()->getData('traycheckout_url_payment').'\');" class="button btn-proceed-checkout btn-checkout" title="Efetuar Transfer&ecirc;ncia Online" type="button"><span><span>Efetuar Transfer&ecirc;ncia Online</span></span></button></span>';

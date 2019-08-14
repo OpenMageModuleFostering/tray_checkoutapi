@@ -38,7 +38,7 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
        $this->renderLayout();
     }
     
-    public function returnconfigmoduleAction()
+    /*public function returnconfigmoduleAction()
     {
         
         $code = $this->getRequest()->getParam('code', false);
@@ -76,7 +76,7 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
             
             echo $script;
         }
-    }
+    }*/
     
     public function paymentbackendAction() 
     {
