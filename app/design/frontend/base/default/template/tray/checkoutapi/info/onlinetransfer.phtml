@@ -24,14 +24,12 @@
     <br/>
     <?php 
         if($this->getInfo()->getData("cc_type") != NULL){
-            $tcTxtPaymentMethod = array("Diners Club","Visa","Mastercard","American Express","Boleto Bancário","Itaú Shopline","Peela","Discovery","Elo","Aura","JCB","Transf. Online Bradesco","Transf. Online Banco do Brasil");
-            $tcIdPaymentMethod = array("2","3","4","5","6","7","14","15","16","18","19","22","23");
-            $tcIdPaymentMethodCreditCard = array("","2","3","4","5","15","16","18","19");
+            $tcTxtPaymentMethod = array("Boleto Bancário","Itaú Shopline","Peela","Transf. Online HSBC","Transf. Online Bradesco","Transf. Online Banco do Brasil");
+            $tcIdPaymentMethod = array("6","7","14","21","22","23");
 
             echo $tcTxtPaymentMethod[array_search($this->getInfo()->getData("cc_type"), $tcIdPaymentMethod)];
         } 
     ?>
-    <?php echo (array_search($this->getInfo()->getData("cc_type"), $tcIdPaymentMethodCreditCard)) ? $this->getInfo()->getData("traycheckout_split_number") . " x R$". number_format((float)$this->getInfo()->getData("traycheckout_split_value"), 2, ',','') : ""; ?>
 </p>
 <?php echo $this->getLinkPayment($this->getInfo()->getOrder()); ?>
 
