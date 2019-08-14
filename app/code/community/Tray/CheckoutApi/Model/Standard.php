@@ -656,7 +656,7 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
                         $frase = 'Tray - Aprovado. Pagamento (fatura) confirmado automaticamente.';
 
                         $order->addStatusToHistory(
-                                $order->getStatus(), //continue setting current order status
+                                Mage_Sales_Model_Order::STATE_PROCESSING, 
                                 Mage::helper('checkoutapi')->__($frase), true
                         );
                     

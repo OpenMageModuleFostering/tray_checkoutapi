@@ -27,7 +27,7 @@
           $strTcPaymentMethods = $_standardPD->getConfigData("tcPaymentMethods");
           
           if($strTcPaymentMethods == "" || $strTcPaymentMethods == null){
-              $tcPaymentMethods = explode(",","3,4,2,5,18,16,15,19,14,7,22,23,6,20,25");
+              $tcPaymentMethods = explode(",","3,4,2,5,18,16,15,19,20,25");
           }else{
               $tcPaymentMethods = explode(",",$strTcPaymentMethods);
           }
@@ -88,7 +88,7 @@
                     ?>
                         <li class="tcPaymentMethod" >
                             <!--input type="radio" name="tcPaymentMethodR" value="<?php echo $idTcPayment;?>" onclick="document.getElementById('tcPaymentMethod').value = this.value;"/-->
-                            <img src="<?php echo $this->getSkinUrl('tray/checkoutapi/images/'.$imgSrc.'-flag.svg') ?>" class="tcPaymentFlag" id="tcPaymentFlag<?php echo $idTcPayment;?>" onclick="selectCreditCardTc('<?php echo $idTcPayment;?>')">
+                            <img src="<?php echo $this->getSkinUrl('tray/checkoutapi/images/'.$imgSrc.'-flag.svg') ?>" class="tcPaymentFlag" id="tcPaymentFlag<?php echo $idTcPayment;?>" onclick="selectCreditCardTc('<?php echo $idTcPayment;?>','<?php echo number_format((float)$totals->grand_total, 2, '.',''); ?>','<?php echo Mage::getBaseUrl();?>')">
                         </li>
                     <?php
                         }
@@ -108,7 +108,7 @@
                 <li>
                     <div class="input-box">
                         <label for="<?php echo $_code ?>_cc_number"><?php echo Mage::helper('payment')->__('Credit Card Number') ?> <span class="required">*</span></label><br/>
-                        <input type="text" id="<?php echo $_code ?>_cc_number" name="payment[cc_number]" title="<?php echo Mage::helper('payment')->__('Credit Card Number') ?>" class="required-entry input-text validate-cc-number" value="<?php echo $this->getInfoData('cc_number')?>" onkeyup="identifyCreditCardTc(this.value)"/>
+                        <input type="text" id="<?php echo $_code ?>_cc_number" name="payment[cc_number]" title="<?php echo Mage::helper('payment')->__('Credit Card Number') ?>" class="required-entry input-text validate-cc-number" value="<?php echo $this->getInfoData('cc_number')?>" onkeyup="identifyCreditCardTc(this.value)" onblur="getSplitValues('<?php echo number_format((float)$totals->grand_total, 2, '.',''); ?>',document.getElementById('tcPaymentMethod').value,'<?php echo Mage::getBaseUrl();?>')"/>
                     </div>
                 </li>
                 <li>
@@ -121,7 +121,7 @@
                         <?php endforeach ?>
                         </select>
                         <?php $_ccExpYear = $this->getInfoData('cc_exp_year') ?>
-                        <select id="<?php echo $_code ?>_expiration_yr" style="width:103px;" name="payment[cc_exp_year]" class="required-entry">
+                        <select id="<?php echo $_code ?>_expiration_yr" style="width:102px;" name="payment[cc_exp_year]" class="required-entry">
                         <?php foreach ($this->getCcYears() as $k=>$v): ?>
                             <option value="<?php echo $k ? $k : '' ?>" <?php if($k==$_ccExpYear): ?>selected="selected"<?php endif ?>><?php echo $v ?></option>
                         <?php endforeach ?>
@@ -132,11 +132,8 @@
                     <div class="input-box">
                         <input type="hidden" id="<?php echo $_code ?>_split_value" name="payment[traycheckout_split_value]" value="<?php echo $this->getInfoData('traycheckout_split_value')?>"/>
                         <label for="<?php echo $_code ?>_split"><?php echo Mage::helper('payment')->__('Parcelas') ?> <span class="required">*</span></label><br/>
-                        <select id="<?php echo $_code ?>_split" style="width:140px;" name="payment[traycheckout_split_number]" class="required-entry" onchange="document.getElementById('<?php echo $_code ?>_split_value').value = this.options[this.selectedIndex].text.replace(/.*R\$/,'').replace(/\,/,'.');">
-                        <?php $_ccSplitSimulator = $this->getInfoData('traycheckout_split_number') ?>
-                        <?php foreach ($this->getSplitSimulate($totals->grand_total) as $k=>$v): ?>
-                            <option value="<?php echo $k ?>" <?php if($k==$_ccSplitSimulator): ?>selected="selected"<?php endif ?>><?php echo $v ?></option>
-                        <?php endforeach ?>
+                        <select id="<?php echo $_code ?>_split" style="width:252px;" name="payment[traycheckout_split_number]" class="required-entry" onchange="document.getElementById('<?php echo $_code ?>_split_value').value = this.options[this.selectedIndex].text.replace(/.*R\$/,'').replace(/\,/,'.');">
+                            <option value="">Parcela(s)</option>
                         </select>
                     </div>
                 </li>

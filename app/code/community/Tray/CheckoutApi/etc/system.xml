@@ -142,23 +142,6 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </tcQtdSplit>
-                        <tcNoSplitTaxRate translate="label">
-                            <label>Parcelas sem Acréscimo</label>
-                            <frontend_type>select</frontend_type>
-                            <sort_order>8</sort_order>
-                            <source_model>checkoutapi/source_qtdsplit</source_model>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </tcNoSplitTaxRate>
-                        <splitTax translate="label">
-                            <label>Taxa de Acréscimo</label>
-                            <frontend_type>text</frontend_type>
-                            <sort_order>10</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </splitTax>
                         <allowspecific translate="label">
                             <label>Tipos de Países Permitidos</label>
                             <frontend_type>select</frontend_type>

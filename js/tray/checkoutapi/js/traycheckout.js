@@ -60,7 +60,7 @@ function identifyCreditCardTc(ccNumber){
 
 }
 
-function selectCreditCardTc(idPaymentTC){
+function selectCreditCardTc(idPaymentTC,pPrice,pathM){
     
     document.getElementById('tcPaymentMethod').value = "";
     
@@ -77,6 +77,8 @@ function selectCreditCardTc(idPaymentTC){
 
     document.getElementById('tcPaymentMethod').value = idPaymentTC;
     document.getElementById('tcPaymentFlag'+idPaymentTC).className = 'tcPaymentFlag tcPaymentFlagSelected';
+    
+    getSplitValues(pPrice, idPaymentTC, pathM);
 }
 
 function selectTefTc(idPaymentTC){
@@ -91,5 +93,46 @@ function selectTefTc(idPaymentTC){
 
     document.getElementById('tctPaymentMethod').value = idPaymentTC;
     document.getElementById('tctPaymentFlag'+idPaymentTC).className = 'tctPaymentFlag tctPaymentFlagSelected';
+}
+
+function getSplitValues(pPrice, pMethod, pathM){
+    
+    if (pMethod != ""){
+        document.getElementById('traycheckoutapi_split').innerHTML = "<option value=\"\">Carregando ...</option>";
+        var data_file = pathM+"checkoutapi/standard/getsplit/price/"+pPrice+"/method/"+pMethod;
+
+        var http_request = new XMLHttpRequest();
+        try{
+           http_request = new XMLHttpRequest();
+        }catch (e){
+           try{
+              http_request = new ActiveXObject("Msxml2.XMLHTTP");
+           }catch (e) {
+              try{
+                 http_request = new ActiveXObject("Microsoft.XMLHTTP");
+              }catch (e){
+                 console.debug("Your browser broke!");
+                 return false;
+              }
+
+           }
+        }
+
+        http_request.onreadystatechange = function(){
+           if (http_request.readyState == 4){
+              var jsonObj = JSON.parse(http_request.responseText);
+              document.getElementById('traycheckoutapi_split').innerHTML = "";
+              var optionSplit = "";
+              for(var key in jsonObj){
+                  optionSplit += "<option value='"+key+"'>"+jsonObj[key]+"</option>";
+              }
+              document.getElementById('traycheckoutapi_split').innerHTML = optionSplit;
+              //console.debug(jsonObj);
+           }
+        }
+
+        http_request.open("GET", data_file, true);
+        http_request.send();
+    }
 }
 

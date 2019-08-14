@@ -385,8 +385,9 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
 									
                                     $frase = 'Tray - Aprovado. Pagamento (fatura) confirmado automaticamente.';
 
+                                    
                                     $order->addStatusToHistory(
-                                            $order->getStatus(), //continue setting current order status
+                                            Mage_Sales_Model_Order::STATE_PROCESSING, 
                                             Mage::helper('checkoutapi')->__($frase), true
                                     );
 
@@ -422,6 +423,36 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
                 $order->save();
             }
         }
+    }
+    
+    public function getsplitAction()
+    {
+        $tcStandard = Mage::getModel('checkoutapi/standard');
+        
+        $params = array(
+            "token_account" => $tcStandard->getConfigData('token'),
+            "price" => $this->getRequest()->getParam('price', false)
+        );
+        
+        $method =  $this->getRequest()->getParam('method', false);
+        
+        $tcResponse = simplexml_load_string($tcStandard->getTrayCheckoutRequest("/edge/transactions/simulate_splitting",$params));
+        
+        foreach ($tcResponse->data_response->payment_methods->payment_method as $payment_method){
+            if(intval($payment_method->payment_method_id) == intval($method)){
+                $splittings = $payment_method->splittings->splitting;
+                //echo "<p>Método: $payment_method->payment_method_id - $payment_method->payment_method_name </p>";
+            }
+        }
+        
+        
+        for($auxS = 0; $auxS < (int)$tcStandard->getConfigData('tcQtdSplit') && $auxS < sizeof($splittings); $auxS++){
+            $splitting = $splittings[$auxS];
+            $splitSimulate[(int)$splitting->split] = (string)$splitting->split . " x de R$" . number_format((float)$splitting->value_split, 2, ',','') . (((float)$splitting->split_rate == 0) ? " sem " : " com ") . "juros";
+        }
+        
+        echo json_encode($splitSimulate);
+        
     }
 
 }
