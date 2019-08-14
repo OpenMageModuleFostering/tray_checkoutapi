@@ -382,6 +382,7 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         }
         
 	$sArr['token_account']= $this->getConfigData('token');
+	$sArr['transaction[free]']= "MAGENTO_API_v".(string) Mage::getConfig()->getNode()->modules->Tray_CheckoutApi->version;
         $sArr['transaction[order_number]']= $this->getConfigData('prefixo').$orderIncrementId;
 
     	$sArr['customer[name]']= $order->getData("customer_firstname") . ' ' . str_replace("(pj)", "", $order->getData("customer_lastname"));
@@ -457,7 +458,7 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
     {
          if ($this->getConfigData('sandbox') == '1')
          {
-         	return 'http://api.sandbox.traycheckout.com.br';
+         	return 'https://api.sandbox.traycheckout.com.br';
          } else {
          	return 'https://api.traycheckout.com.br';
          }
