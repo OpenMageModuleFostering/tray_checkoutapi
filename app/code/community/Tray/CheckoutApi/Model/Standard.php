@@ -132,29 +132,33 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
 
         $paymentMethod = "";
 
+        $info = $this->getInfoInstance();
+
         switch ($data->getMethod()) {
             case 'traycheckoutapi':
                 $paymentMethod = $data->getTraycheckoutPaymentCodeCreditcard();
+                $info->setCcType($paymentMethod)
+                 ->setCcOwner($data->getCcOwner())
+                 ->setCcLast4(substr($data->getCcNumber(), -4))
+                 ->setCcNumber($data->getCcNumber())
+                 ->setCcCid($data->getCcCid())
+                 ->setCcExpMonth($data->getCcExpMonth())
+                 ->setCcExpYear($data->getCcExpYear())
+                 ->setTraycheckoutSplitNumber($data->getTraycheckoutSplitNumber())
+                 ->setTraycheckoutSplitValue($data->getTraycheckoutSplitValue())
+                 ->setCcNumber($data->getCcNumber());
                 break;
             case 'traycheckoutapi_onlinetransfer':
                 $paymentMethod = $data->getTraycheckoutPaymentCodeTef();
+                $info->setCcType($paymentMethod);
                 break;
             case 'traycheckoutapi_bankslip':
                 $paymentMethod = $data->getTraycheckoutPaymentCodeBankslip();
+                $info->setCcType($paymentMethod);
                 break;
         }
 
-        $info = $this->getInfoInstance();
-        $info->setCcType($paymentMethod)
-             ->setCcOwner($data->getCcOwner())
-             ->setCcLast4(substr($data->getCcNumber(), -4))
-             ->setCcNumber($data->getCcNumber())
-             ->setCcCid($data->getCcCid())
-             ->setCcExpMonth($data->getCcExpMonth())
-             ->setCcExpYear($data->getCcExpYear())
-             ->setTraycheckoutSplitNumber($data->getTraycheckoutSplitNumber())
-             ->setTraycheckoutSplitValue($data->getTraycheckoutSplitValue())
-             ->setCcNumber($data->getCcNumber());
+        
         return $this;
     }
     
@@ -482,8 +486,10 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         
         $sArr['transaction[url_process]'] = Mage::getUrl('checkoutapi/standard/return',  array('_secure' => true));
         $sArr['transaction[url_success]'] = Mage::getUrl('checkoutapi/standard/return', array('_secure' => true));
-        $sArr['transaction[url_notification]'] = Mage::getUrl('checkoutapi/standard/success', array('_secure' => true, 'type' => $notification));
+        $sArr['transaction[url_notification]'] = Mage::getUrl('checkoutapi/standard/success', array('type' => $this->getNotification()));
         
+        //Mage::log('type URL: ' .  $this->notification , null, 'traycheckout.log');
+        Mage::log('type URL: ' .  Mage::getUrl('checkoutapi/standard/success', array('type' => $this->getNotification())) , null, 'traycheckout.log');
         //Exemplo de Afiliados
         //$sArr['affiliates[0][account_email]'] = 'emailaffiliate1@devtray.com.br';
         //$sArr['affiliates[0][percentage]'] = '20';
@@ -528,6 +534,9 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
     public function getTypeErrorTrayCheckout() {
         return $this->errorTypeErrorTrayCheckout;
     }
+    public function getNotification() {
+        return $this->notification;
+    }
     
     public function hasErrorTrayCheckout($res){
         $xml = simplexml_load_string($res);
@@ -570,7 +579,7 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         if(is_array($params)){
             $params = http_build_query($params);
         }
-        //Mage::log('Data: '.  $params, null, 'traycheckout.log');
+        Mage::log('Data: '.  $params, null, 'traycheckout.log');
         $patterns = array();
         $patterns[0] = '/card_name%5D=[\w\W]*&payment%5Bcard_number/';
         $patterns[1] = '/card_number%5D=\d+\D/';

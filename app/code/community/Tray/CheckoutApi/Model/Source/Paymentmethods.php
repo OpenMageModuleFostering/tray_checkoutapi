@@ -30,8 +30,8 @@ class Tray_CheckoutApi_Model_Source_Paymentmethods
             array('value' => '16', 'label'=>Mage::helper('adminhtml')->__('Elo')),
             array('value' => '15', 'label'=>Mage::helper('adminhtml')->__('Discover')),
             array('value' => '19', 'label'=>Mage::helper('adminhtml')->__('JCB')),
-            array('value' => '20', 'label'=>Mage::helper('adminhtml')->__('Hiper')),
-            array('value' => '25', 'label'=>Mage::helper('adminhtml')->__('Hipercard')),
+            array('value' => '20', 'label'=>Mage::helper('adminhtml')->__('Hipercard')),
+            array('value' => '25', 'label'=>Mage::helper('adminhtml')->__('Hiper')),
         );
     }
 }
