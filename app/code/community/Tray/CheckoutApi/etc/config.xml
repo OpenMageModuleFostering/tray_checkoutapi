@@ -21,7 +21,7 @@
 <config>
     <modules>
         <Tray_CheckoutApi>
-            <version>1.3.0</version>
+            <version>1.3.1</version>
         </Tray_CheckoutApi>
     </modules>
     <global>
