@@ -601,7 +601,6 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         $order->getPayment()->setData("traycheckout_url_payment", $transactionTc->payment->url_payment);
         $order->getPayment()->setData("traycheckout_typeful_line", $transactionTc->payment->linha_digitavel);
         
-        
         $cod_status = $transactionTc->status_id;
         $comment = "";
         if (isset($transactionTc->status_id)) {

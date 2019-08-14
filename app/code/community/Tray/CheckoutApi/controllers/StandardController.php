@@ -150,9 +150,9 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
     {
          if ($sandbox == '1')
          {
-        	return "http://api.sandbox.checkout.tray.com.br/api/v1/transactions/get_by_token";
+        	return "https://api.sandbox.traycheckout.com.br/v2/transactions/get_by_token";
          } else {
-		return "http://api.checkout.tray.com.br/api/v1/transactions/get_by_token";
+		return "https://api.traycheckout.com.br/v2/transactions/get_by_token";
          }
     }
     
@@ -165,38 +165,79 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
     public function successAction() 
     {
         $_type = $this->getRequest()->getParam('type', false);
-        $token = $this->getApi()->getConfigData('token');; 
+        $token = $this->getApi()->getConfigData('token');
 
 	$urlPost = $this->getUrlPostCheckoutApi($this->getApi()->getConfigData('sandbox'));
 
         $dados_post = $this->getRequest()->getPost();
          
         $order_number_conf = utf8_encode(str_replace($this->getApi()->getConfigData('prefixo'),'',$dados_post['transaction']['order_number']));
-        $transaction_token= $dados_post['transaction']['transaction_token']; 
+        $transaction_token= $dados_post['token_transaction'];
+        
+        $dataRequest['token_transaction'] = $transaction_token;
+        $dataRequest['token_account'] = trim($token);
+        $dataRequest['type_response'] = 'J';
+        
+        //$transaction_token= $dados_post['transaction']['transaction_token']; 
 
-        ob_start(); 
-        $ch = curl_init(); 
-        curl_setopt($ch, CURLOPT_URL, $urlPost); 
-        curl_setopt($ch, CURLOPT_POST, 1); 
-        curl_setopt($ch, CURLOPT_POSTFIELDS, array("token"=>trim($transaction_token), "type_response"=>"J")); 
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array( "Expect:")); 
-        curl_setopt ($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
-        curl_setopt ($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
-        curl_exec ($ch); 
+        Mage::log('URL de Request: '.$urlPost, null, 'traycheckout.log');
+        $ch = curl_init ( $urlPost );
+        
+        if(is_array($dataRequest)){
+            Mage::log('Data: '. http_build_query($dataRequest), null, 'traycheckout.log');
+        }else{
+            Mage::log('Data: '.  $dataRequest, null, 'traycheckout.log');
+        }
+        
+        curl_setopt ( $ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1 );
+        curl_setopt ( $ch, CURLOPT_POST, 1 );
+        curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1 );
+        curl_setopt ( $ch, CURLOPT_POSTFIELDS, $dataRequest);
+        curl_setopt ( $ch, CURLOPT_SSL_VERIFYPEER, FALSE );
+        curl_setopt ( $ch, CURLOPT_SSL_VERIFYHOST, FALSE );
 
-        /* XML ou Json de retorno */ 
-        $resposta = ob_get_contents(); 
-        ob_end_clean(); 
-
-        /* Capturando o http code para tratamento dos erros na requisi��o*/ 
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE); 
+        
+        if (!($resposta = curl_exec($ch))) {
+            Mage::log('Error: Erro na execucao! ', null, 'traycheckout.log');
+            if(curl_errno($ch)){
+                Mage::log('Error '.curl_errno($ch).': '. curl_error($ch), null, 'traycheckout.log');
+            }else{
+                Mage::log('Error : '. curl_error($ch), null, 'traycheckout.log');
+            }
+            
+            Mage::app()->getResponse()->setRedirect('checkoutapi/standard/error', array('_secure' => true , 'descricao' => urlencode(utf8_encode("Erro de execução!")),'codigo' => urlencode("999")))->sendResponse();
+            echo "Erro na execucao!";
+            curl_close ( $ch );
+            exit();    
+        }
+        
+        
+        $httpCode = curl_getinfo ( $ch, CURLINFO_HTTP_CODE );
+        
         curl_close($ch); 
+        
         $arrResponse = json_decode($resposta,TRUE);
+        
+        $message_response = $arrResponse['message_response'];
+        $error_response = $arrResponse['error_response'];
+        if($message_response['message'] == "error"){
+            if(!empty($error_response['general_errors'])){
+                foreach ($error_response['general_errors'] as $general_error){
+                    $codigo_erro .= $general_error['code'] . " | ";
+                    $descricao_erro .= $general_error['message'] . " | ";
+                }
 
-        $xml = simplexml_load_string($resposta);
-        if($httpCode != "200" ){
-            $codigo_erro = $xml->codigo;
-            $descricao_erro = $xml->descricao;
+            }
+            if(!empty($error_response['validation_errors'])){
+                var_dump($error_response['validation_errors']);
+                foreach ($error_response['validation_errors'] as $validation_error){
+                    $codigo_erro .= $validation_error['field'] . " | ";
+                    $descricao_erro .= $validation_error['message_complete'] . " | ";
+                }
+            }
+            $codigo_erro = substr($codigo_erro, 0, - 3);
+            $descricao_erro = substr($descricao_erro, 0, - 3);
+            
             if ($codigo_erro == ''){
                 $codigo_erro = '0000000';
             }
@@ -208,27 +249,15 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
         	
             $transaction = $arrResponse['data_response']['transaction'];
             $order_number = str_replace($this->getApi()->getConfigData('prefixo'),'',$transaction['order_number']);
-        	if($order_number != $order_number_conf) {
-        		$codigo_erro = '0000000';
-                $descricao_erro = "Pedido: " . $order_number_conf . " não corresponte com a pedido consultado: ".$order_number."!";
-                $this->_redirect('checkoutapi/standard/error', array('_secure' => true , 'descricao' => urlencode(utf8_encode($descricao_erro)),'codigo' => urlencode($codigo_erro)));
-        	}
-            
-            if (isset($transaction['status_id'])) {
-                $comment .= " " . $transaction['status_id'];
-            }
-
-            if (isset($transaction['status_name'])) {
-                $comment .= " - " . $transaction['status_name'];
-            }
-            echo "Pedido: $order_number - $comment - ID: ".$dados_post['transaction']['transaction_id'];
             $order = Mage::getModel('sales/order');
 
             $order->loadByIncrementId($order_number);
             
+            echo "Pedido: $order_number - ID: ".$transaction['transaction_id'];
+            
             if ($order->getId()) {
 
-                if ($transaction['price_original'] != $order->getGrandTotal()) {
+                if (floatval($transaction['payment']['price_original']) != floatval($order->getGrandTotal())) {
                     
                     $frase = 'Total pago à Tray é diferente do valor original.';
 
@@ -236,21 +265,22 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
                             $order->getStatus(), //continue setting current order status
                             Mage::helper('checkoutapi')->__($frase), true
                     );
-
+                    echo $frase;
                     $order->sendOrderUpdateEmail(true, $frase);
                 } else {
                     $cod_status = $transaction['status_id'];
-
+                    
+                    $comment = $cod_status . ' - ' . $transaction['status_name'];
                     switch ($cod_status){
-                        case '4': 
-                        case '5':
-                        case '88':
+                        case 4: 
+                        case 5:
+                        case 88:
                                 $order->addStatusToHistory(
                                     Mage_Sales_Model_Order::STATE_PENDING_PAYMENT, Mage::helper('checkoutapi')->__('Tray enviou automaticamente o status: %s', $comment)
                                     
                                 );
                             break;
-                        case '6':
+                        case 6:
                                 $items = $order->getAllItems();
 
                                 $thereIsVirtual = false;
@@ -325,13 +355,13 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
                                     }
                                 }
                             break;
-                        case '24':
+                        case 24:
                                 $order->addStatusToHistory(
                                     Mage_Sales_Model_Order::STATE_HOLDED, Mage::helper('checkoutapi')->__('Tray enviou automaticamente o status: %s', $comment)
                                 );
                             break;
-                        case '7':
-                        case '89':                        	
+                        case 7:
+                        case 89:                        	
                                 $frase = 'Tray - Cancelado. Pedido cancelado automaticamente (transação foi cancelada, pagamento foi negado, pagamento foi estornado ou ocorreu um chargeback).';
 
                                 $order->addStatusToHistory(
@@ -342,7 +372,7 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
 
                                 $order->cancel();
                             break;
-                        case '87':
+                        case 87:
                                 $order->addStatusToHistory(
                                     Mage_Sales_Model_Order::STATE_PAYMENT_REVIEW, Mage::helper('checkoutapi')->__('Tray enviou automaticamente o status: %s', $comment)
                                 );
