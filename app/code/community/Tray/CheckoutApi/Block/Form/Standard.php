@@ -80,8 +80,10 @@ class Tray_CheckoutApi_Block_Form_Standard extends Mage_Payment_Block_Form
         $splitSimulate = array(""=>'Parcela(s)');
         
         for($iTc = 0; $iTc < (int)$tcStandard->getConfigData('tcQtdSplit'); $iTc++){
-            $splittings = $tcResponse->data_response->splittings->splitting[$iTc];
-            $splitSimulate[(int)$splittings->split] = (string)$splittings->split . " x de R$" . number_format((float)$splittings->value_split, 2, ',','');
+            if($iTc < count($tcResponse->data_response->splittings->splitting)){
+                $splittings = $tcResponse->data_response->splittings->splitting[$iTc];
+                $splitSimulate[(int)$splittings->split] = (string)$splittings->split . " x de R$" . number_format((float)$splittings->value_split, 2, ',','');
+            }
         }
         
         $this->setData('splitSimulate', $splitSimulate);

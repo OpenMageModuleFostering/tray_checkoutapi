@@ -114,11 +114,18 @@
                     <?php
                         foreach ($tcPaymentMethods as $idTcPayment){
                             $displayCcInfo = "none";
+                            $displayPaymentMethod = "block";
                             if(!in_array($idTcPayment, array("6","7","14","22","23"))){
+                                if(floatval($totals->grand_total) < 10 ){
+                                    $displayPaymentMethod = "none";
+                                }
                                 $displayCcInfo = "block";
                             }
+                            if(floatval($totals->grand_total) < 1 ){
+                                $displayPaymentMethod = "none";
+                            }
                     ?>
-                        <li class="tcPaymentMethod">
+                        <li class="tcPaymentMethod" style="display: <?php echo $displayPaymentMethod;?>;">
                             <input type="radio" name="tcPaymentMethodR" value="<?php echo $idTcPayment;?>" onclick="document.getElementById('tcPaymentMethod').value = this.value; document.getElementById('displayCcInfo').style.display = '<?php echo $displayCcInfo;?>'"/>
                             <span class="tcPaymentFlag tcPaymentFlag<?php echo $idTcPayment;?>">
                                 &nbsp;

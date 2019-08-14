@@ -187,19 +187,24 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         $billingAddress = $quote->getBillingAddress();
         
         // Verificação se consta o nome vazio do consumidor
+        Mage::log('Validate - Name Data: '. $billingAddress->getData("firstname")." ".$billingAddress->getData("lastname"), null, 'traycheckout.log');
         if (str_replace(" ","",$billingAddress->getData("firstname")." ".$billingAddress->getData("lastname")) == "") {
             $errorMsg .= "Nome do comprador em branco ou inválido!!\n";
         }
+        
         // Validação do CPF do cliente
         $number_taxvat = str_replace(" ","",str_replace(".","",str_replace("-","",$quote->getCustomer()->getData("taxvat"))));
+        Mage::log('Validate - CPF Data: '. $number_taxvat, null, 'traycheckout.log');
         if($number_taxvat == null){
             $number_taxvat = str_replace(" ","",str_replace(".","",str_replace("-","",$billingAddress->getData("taxvat"))));
         }
         if (preg_match("/[a-zA-Z]/",$number_taxvat)) {
             $errorMsg .= "CPF em branco ou inválido!!\n";
         }
+        
         // Validação do email do cliente
-        if (!filter_var($billingAddress->getData("email"), FILTER_VALIDATE_EMAIL)) {
+        Mage::log('Validate - Email Data: '. $quote->getCustomer()->getEmail(), null, 'traycheckout.log');
+        if (!filter_var($quote->getCustomer()->getEmail(), FILTER_VALIDATE_EMAIL)) {
             $errorMsg .= "E-mail em branco ou inválido!!\n";
         }
         
@@ -208,33 +213,54 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         $number_contact = str_replace("(","",$number_contact);
         $number_contact = str_replace(")","",$number_contact);
         $number_contact = str_replace("-","",$number_contact);
+        Mage::log('Validate - Phone Data: '. $number_contact, null, 'traycheckout.log');
         if (preg_match('/[a-zA-Z]/',$number_contact)) {
+            $errorMsg .= "Telefone em branco ou inválido!!\n";
+        }
+        $type_contact = '';
+        if (preg_match('/^[0-9]{2}[5-9]{1}[0-9]{7,8}$/',$number_contact)) {
+            $type_contact = "M";
+        }
+        if (preg_match('/^[0-9]{2}[1-6]{1}[0-9]{7}$/',$number_contact)) {
+            $type_contact = "H";
+        }
+        if (preg_match('/^0800[0-9]{6,7}$|^0300[0-9]{6,7}$/',$number_contact)) {
+            $type_contact = "W";
+        }
+        Mage::log('Validate - Type Contact Data: '. $type_contact, null, 'traycheckout.log');
+        if ($type_contact == '') {
             $errorMsg .= "Telefone em branco ou inválido!!\n";
         }
         
         // Verificação se consta o endereço do cliente
+        Mage::log('Validate - Street 1 Data: '. $shippingAddress->getStreet(1), null, 'traycheckout.log');
         if (str_replace(" ","",$shippingAddress->getStreet(1)) == "") {
             $errorMsg .= "Endereço em branco ou inválido!!\n";
         }
         // Validação do número do endereço.
+        Mage::log('Validate - Street 2 Data: '. $shippingAddress->getStreet(2), null, 'traycheckout.log');
         if (preg_match('/[a-zA-Z]/',$shippingAddress->getStreet(2))) {
             $errorMsg .= "Número do endereço em branco ou inválido!!\n";
         }
         // Verificação se consta o bairro do endereço do cliente
+        Mage::log('Validate - Street 4 Data: '. $shippingAddress->getStreet(4), null, 'traycheckout.log');
         if (str_replace(" ","",$shippingAddress->getStreet(4)) == "") {
             $errorMsg .= "Bairro em branco ou inválido!!\n";
         }
         // Verificação se consta o cidade do endereço do cliente
+        Mage::log('Validate - City Data: '. $shippingAddress->getCity(), null, 'traycheckout.log');
         if (str_replace(" ","",$shippingAddress->getCity()) == "") {
             $errorMsg .= "Cidade em branco ou inválido!!\n";
         }
         // Validação do número do endereço.
+        Mage::log('Validate - State Data: '. $shippingAddress->getRegionCode(), null, 'traycheckout.log');
         if (!preg_match('/[A-Z]{2}$/',$shippingAddress->getRegionCode())) {
             if (!preg_match('/[A-Z]{2}$/',$shippingAddress->getRegion())) {
                 $errorMsg .= "Estado em branco ou inválido!!\n";
             }
         }
         //var_dump($shippingAddress->getRegionCode());
+        
         $currency_code = $this->getQuote()->getBaseCurrencyCode();
         if (!$currency_code){
             $session = Mage::getSingleton('adminhtml/session_quote');
@@ -353,23 +379,12 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         
         $sArr = array();
         
-        //$number_contact = substr(str_replace(" ","",str_replace("(","",str_replace(")","",str_replace("-","",$a->getTelephone())))),0,2) . substr(str_replace(" ","",str_replace("-","",$a->getTelephone())),-8);
-        /*if (preg_match('/^0800[0-9]{6,7}$|^0300[0-9]{6,7}$/',$a->getTelephone())) {
-            $number_contact = str_replace(" ","",$a->getTelephone());
-            $number_contact = str_replace("(","",$number_contact);
-            $number_contact = str_replace(")","",$number_contact);
-            $number_contact = str_replace("-","",$number_contact);
-        }else{
-            $number_contact = str_replace(" ","",$a->getTelephone());
-            $number_contact = str_replace("(","",$number_contact);
-            $number_contact = str_replace(")","",$number_contact);
-            $number_contact = str_replace("-","",$number_contact);
-            //$number_contact = substr($number_contact,0,2) . substr($number_contact,-8);
-        }*/
         $number_contact = str_replace(" ","",$a->getTelephone());
         $number_contact = str_replace("(","",$number_contact);
         $number_contact = str_replace(")","",$number_contact);
         $number_contact = str_replace("-","",$number_contact);
+        
+        $type_contact = "H";
         
         if (preg_match('/^[0-9]{2}[5-9]{1}[0-9]{7,8}$/',$number_contact)) {
             $type_contact = "M";
@@ -389,7 +404,7 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
     	$sArr['customer[cpf]']= $order->getData("customer_taxvat");
         $sArr['customer[contacts][][number_contact]']= $number_contact;
         $sArr['customer[contacts][][type_contact]']= $type_contact; 
-        $sArr['customer[email]']= $a->getEmail();
+        $sArr['customer[email]']= $order->getData("customer_email");
         
         // Endereço de Entrega
         $sArr['customer[addresses][0][type_address]']= "D";
