@@ -73,8 +73,9 @@ class Tray_CheckoutApi_Model_Observer extends Varien_Object
         Mage::log($order->getPayment()->getData('method'), null, 'traycheckout.log');
         
         if ($paymentMethodName == "traycheckoutapi" || $paymentMethodName == "traycheckoutapi_bankslip" || $paymentMethodName == "traycheckoutapi_onlinetransfer"){
-            $paymentMethod = ($paymentMethod == "traycheckoutapi_bankslip") ? "bankslip" : (($paymentMethod == "traycheckoutapi_onlinetransfer") ? "onlinetransfer" : "standard");
+            $paymentMethod = ($paymentMethodName == "traycheckoutapi_bankslip") ? "bankslip" : (($paymentMethodName == "traycheckoutapi_onlinetransfer") ? "onlinetransfer" : "standard");
             $configTc = Mage::getSingleton('checkoutapi/'.$paymentMethod);
+            
 
             $tracking = array();
 
