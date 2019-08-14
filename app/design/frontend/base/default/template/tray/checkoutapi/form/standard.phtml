@@ -23,6 +23,9 @@
           $_standardPD = Mage::getSingleton('checkoutapi/standard');
           
           $totals = Mage::getSingleton('checkout/session')->getQuote()->collectTotals();  
+          Mage::log('########################### Inicio Total Cart Data ###########################', null, 'traycheckout.log');
+          Mage::log(Mage::getSingleton('checkout/session')->getQuote()->collectTotals()->getData(), null, 'traycheckout.log');
+          Mage::log('########################### Fim Total Cart Data ###########################', null, 'traycheckout.log');
           //$shippingAmount = Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress()->getShippingAmount();  
           $strTcPaymentMethods = $_standardPD->getConfigData("tcPaymentMethods");
           
@@ -110,6 +113,9 @@
                         <label for="<?php echo $_code ?>_cc_number"><?php echo Mage::helper('payment')->__('Credit Card Number') ?> <span class="required">*</span></label><br/>
                         <input type="text" id="<?php echo $_code ?>_cc_number" name="payment[cc_number]" title="<?php echo Mage::helper('payment')->__('Credit Card Number') ?>" class="required-entry input-text validate-cc-number" value="<?php echo $this->getInfoData('cc_number')?>" onkeyup="identifyCreditCardTc(this.value.replace(/ /g,''))" onblur="getSplitValues('<?php echo number_format((float)$totals->grand_total, 2, '.',''); ?>',document.getElementById('tcPaymentMethod').value,'<?php echo (Mage::app()->getStore()->isFrontUrlSecure())?Mage::getUrl(''):Mage::getBaseUrl();?>')"/>
                     </div>
+                        <?php 
+                            print_r($totals->grand_total);
+                        ?>
                 </li>
                 <li>
                     <div class="input-box">

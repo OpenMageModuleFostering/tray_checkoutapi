@@ -127,7 +127,7 @@ function getSplitValues(pPrice, pMethod, pathM){
                   optionSplit += "<option value='"+key+"'>"+jsonObj[key]+"</option>";
               }
               document.getElementById('traycheckoutapi_split').innerHTML = optionSplit;
-              //console.debug(jsonObj);
+              document.getElementById('traycheckoutapi_split_value').value = jsonObj[1].replace(/.*R\$/,'').replace(/\,/,'.');
            }
         }
 

@@ -233,8 +233,7 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
         curl_setopt ( $ch, CURLOPT_POST, 1 );
         curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1 );
         curl_setopt ( $ch, CURLOPT_POSTFIELDS, $dataRequest);
-        curl_setopt ( $ch, CURLOPT_SSL_VERIFYPEER, FALSE );
-        curl_setopt ( $ch, CURLOPT_SSL_VERIFYHOST, FALSE );
+        curl_setopt ( $ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2 );
 
         
         if (!($resposta = curl_exec($ch))) {

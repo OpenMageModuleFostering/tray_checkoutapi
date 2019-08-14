@@ -605,10 +605,7 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         curl_setopt ( $ch, CURLOPT_POST, 1 );
         curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1 );
         curl_setopt ( $ch, CURLOPT_POSTFIELDS, $params);
-        curl_setopt ( $ch, CURLOPT_SSL_VERIFYPEER, FALSE );
-        curl_setopt ( $ch, CURLOPT_SSL_VERIFYHOST, FALSE );
-        //curl_setopt ( $ch, CURLOPT_FORBID_REUSE, 1 );
-        //curl_setopt ( $ch, CURLOPT_HTTPHEADER, array ('Connection: Close' ) );
+        curl_setopt ( $ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2 );
 
         
         if (!($res = curl_exec($ch))) {

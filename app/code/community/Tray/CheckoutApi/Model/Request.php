@@ -41,8 +41,7 @@ class Tray_CheckoutApi_Model_Request extends Varien_Object
         curl_setopt ( $ch, CURLOPT_POST, 1 );
         curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1 );
         curl_setopt ( $ch, CURLOPT_POSTFIELDS, $dataRequest);
-        curl_setopt ( $ch, CURLOPT_SSL_VERIFYPEER, FALSE );
-        curl_setopt ( $ch, CURLOPT_SSL_VERIFYHOST, FALSE );
+        curl_setopt ( $ch, CURLOPT_SSLVERSION, CURL_SSLVERSION_TLSv1_2 );
 
         
         if (!($responseData = curl_exec($ch))) {
