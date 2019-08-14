@@ -436,7 +436,7 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         $sArr['transaction[url_notification]'] = Mage::getUrl('checkoutapi/standard/success', array('_secure' => true, 'type' => 'standard'));
         
         $sArr['payment[payment_method_id]'] = $order->getPayment()->getData('cc_type');
-        $sArr['payment[split]'] = ($order->getPayment()->getData('traycheckout_split_number') == NULL ? '1' : $order->getPayment()->getData('traycheckout_split_number'));
+        $sArr['payment[split]'] = (($order->getPayment()->getData('traycheckout_split_number') == NULL)|| ($order->getPayment()->getData('traycheckout_split_number') == '0') ? '1' : $order->getPayment()->getData('traycheckout_split_number'));
         $sArr['payment[card_name]'] = $order->getPayment()->getData('cc_owner');
         $sArr['payment[card_number]'] = $this->decrypt($order->getPayment()->getData('cc_number_enc'));
         $sArr['payment[card_expdate_month]'] = $order->getPayment()->getData('cc_exp_month');
@@ -509,30 +509,50 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
     
     public function getTrayCheckoutRequest($url = "", $params = "")
     {
+        Mage::log('URL de Request: '.$this->getTrayCheckoutUrl().$url, null, 'traycheckout.log');
         $ch = curl_init ( $this->getTrayCheckoutUrl().$url );
-
+        
+        if(is_array($params)){
+            Mage::log('Data: '. http_build_query($params), null, 'traycheckout.log');
+        }else{
+            Mage::log('Data: '.  $params, null, 'traycheckout.log');
+        }
+        
         curl_setopt ( $ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1 );
         curl_setopt ( $ch, CURLOPT_POST, 1 );
         curl_setopt ( $ch, CURLOPT_RETURNTRANSFER, 1 );
         curl_setopt ( $ch, CURLOPT_POSTFIELDS, $params);
-        curl_setopt ( $ch, CURLOPT_SSL_VERIFYPEER, 1 );
-        curl_setopt ( $ch, CURLOPT_SSL_VERIFYHOST, 2 );
-        curl_setopt ( $ch, CURLOPT_FORBID_REUSE, 1 );
-        curl_setopt ( $ch, CURLOPT_HTTPHEADER, array ('Connection: Close' ) );
+        curl_setopt ( $ch, CURLOPT_SSL_VERIFYPEER, FALSE );
+        curl_setopt ( $ch, CURLOPT_SSL_VERIFYHOST, FALSE );
+        //curl_setopt ( $ch, CURLOPT_FORBID_REUSE, 1 );
+        //curl_setopt ( $ch, CURLOPT_HTTPHEADER, array ('Connection: Close' ) );
 
-        if (! ($res = curl_exec ( $ch ))) {
+        
+        if (!($res = curl_exec($ch))) {
+            Mage::log('Error: Erro na execucao! ', null, 'traycheckout.log');
+            if(curl_errno($ch)){
+                Mage::log('Error '.curl_errno($ch).': '. curl_error($ch), null, 'traycheckout.log');
+            }else{
+                Mage::log('Error : '. curl_error($ch), null, 'traycheckout.log');
+            }
+            
             Mage::app()->getResponse()->setRedirect('checkoutapi/standard/error', array('_secure' => true , 'descricao' => urlencode(utf8_encode("Erro de execução!")),'codigo' => urlencode("999")))->sendResponse();
-                echo "Erro na execucao!";
-                curl_close ( $ch );
-                exit ();
+            echo "Erro na execucao!";
+            curl_close ( $ch );
+            exit();    
         }
+        
+        
         $httpCode = curl_getinfo ( $ch, CURLINFO_HTTP_CODE );
-
+        
         if ($httpCode != "200") {
+                Mage::log('Error: Erro de requisicao em:'. $urlPost, null, 'traycheckout.log');
                 http::httpError("Erro de requisicao em: $urlPost");
                 Mage::app()->getResponse()->setRedirect('checkoutapi/standard/error', array('_secure' => true , 'descricao' => urlencode(utf8_encode("Erro ao conectar em: $url")),'codigo' => urlencode($httpCode)))->sendResponse();
         }
+        
         if(curl_errno($ch)){
+                Mage::log('Error: Erro de conexão: ' . curl_error($ch), null, 'traycheckout.log');
                 http::httpError("Erro de conexão: " . curl_error($ch));
                 Mage::app()->getResponse()->setRedirect('checkoutapi/standard/error', array('_secure' => true , 'descricao' => urlencode(utf8_encode("Erro de conexão: " . curl_error($ch))),'codigo' => urlencode($httpCode)))->sendResponse();
         }
@@ -540,13 +560,16 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         
         if($this->hasErrorTrayCheckout($res)){
             Mage::app()->getResponse()->setRedirect(Mage::getModel('core/url')->getUrl('checkoutapi/standard/error', array('_secure' => true , 'descricao' => urlencode($this->getErrorMessageTrayCheckout()),'codigo' => urlencode($this->getErrorCodeTrayCheckout()),'type' => $this->getTypeErrorTrayCheckout())))->sendResponse();
-            exit;
-        } 
+            exit();
+        }
+        
+        Mage::log('HttpCode: '. $httpCode, null, 'traycheckout.log');
+        Mage::log('Response: '. $res, null, 'traycheckout.log');
         return $res;
     }
     
     function updateTransactionTrayCheckout($transactionTc){
-       
+        
         $order = Mage::getModel('sales/order')->loadByIncrementId(str_replace($this->getConfigData('prefixo'),'',$transactionTc->order_number));
         $quote = Mage::getModel('sales/quote')->load($order->getData("quote_id"));
         

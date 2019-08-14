@@ -76,7 +76,7 @@ class Tray_CheckoutApi_Block_Form_Standard extends Mage_Payment_Block_Form
         
         $params = preg_replace("/splits\%5B\d+\%5D/","splits%5B%5D", http_build_query($params));
                 
-        $tcResponse = simplexml_load_string($tcStandard->getTrayCheckoutRequest("/api/seller_splits/simulate_split",$params));
+        $tcResponse = simplexml_load_string($tcStandard->getTrayCheckoutRequest("/edge/seller_splits/simulate_split",$params));
         $splitSimulate = array(""=>'Parcela(s)');
         
         for($iTc = 0; $iTc < (int)$tcStandard->getConfigData('tcQtdSplit'); $iTc++){
