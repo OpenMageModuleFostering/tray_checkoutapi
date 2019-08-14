@@ -478,7 +478,7 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         $sArr['transaction[shipping_type]'] = $shipping_description;
         $sArr['transaction[shipping_price]'] = $shipping;
         
-        $sArr['transaction[customer_ip]'] = Mage::helper('core/http')->getRemoteAddr(true);
+        $sArr['transaction[customer_ip]'] = Mage::helper('core/http')->getRemoteAddr(false);
         
         $sArr['transaction[url_process]'] = Mage::getUrl('checkoutapi/standard/return',  array('_secure' => true));
         $sArr['transaction[url_success]'] = Mage::getUrl('checkoutapi/standard/return', array('_secure' => true));
