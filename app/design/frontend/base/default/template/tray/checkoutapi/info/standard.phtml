@@ -1,0 +1,36 @@
+<?php
+/**
+ * Magento
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Open Software License (OSL 3.0)
+ * that is bundled with this package in the file LICENSE.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/osl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to suporte@tray.net.br so we can send you a copy immediately.
+ *
+ * @category   Tray
+ * @package    Tray_CheckoutApi
+ * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+?>       
+<p>
+    <strong>
+        <?php echo $this->htmlEscape($this->getMethod()->getTitle()) ?>
+    </strong>
+    <br/>
+    <?php 
+        if($this->getInfo()->getData("cc_type") != NULL){
+            $tcTxtPaymentMethod = array("Diners Club","Visa","Mastercard","American Express","Boleto Bancário","Itaú Shopline","Peela","Discovery","Elo","Aura","JCB","Transf. Online Bradesco","Transf. Online Banco do Brasil");
+            $tcIdPaymentMethod = array("2","3","4","5","6","7","14","15","16","18","19","22","23");
+            $tcIdPaymentMethodCreditCard = array("","2","3","4","5","15","16","18","19");
+
+            echo $tcTxtPaymentMethod[array_search($this->getInfo()->getData("cc_type"), $tcIdPaymentMethod)];
+        } 
+    ?>
+    <?php echo (array_search($this->getInfo()->getData("cc_type"), $tcIdPaymentMethodCreditCard)) ? $this->getInfo()->getData("traycheckout_split_number") . " x R$". number_format((float)$this->getInfo()->getData("traycheckout_split_value"), 2, ',','') : ""; ?>
+</p>
+<?php echo $this->getLinkPayment($this->getInfo()->getOrder()); ?>
