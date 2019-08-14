@@ -18,12 +18,38 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 -->
-<layout version="0.7.0">
+<layout version="1.1.12">
+    <default>
+        <reference name="head">
+            <action method="addJs">
+                <script>tray/checkoutapi/js/traycheckout.js</script>
+            </action>
+        </reference>
+    </default>
+    <checkoutapi_standard_success>
+        <reference name="head">
+            <block type="core/text" name="google.cdn.jquery">
+                <action method="setText">
+                    <text>
+                       <![CDATA[<script src="https://static.traycheckout.com.br/js/finger_print.js" type="text/javascript"></script>]]>
+                    </text>
+                </action>
+             </block>
+        </reference>
+    </checkoutapi_standard_success>
+    
     <checkoutapi_standard_payment>
-        <reference nam0.1.0e="head">
+        <reference name="head">
             <action method="addCss">
                 <stylesheet>tray/checkoutapi/css/styles.css</stylesheet>
             </action> 
+            <block type="core/text" name="google.cdn.jquery">
+                <action method="setText">
+                    <text>
+                       <![CDATA[<script src="https://static.traycheckout.com.br/js/finger_print.js" type="text/javascript"></script>]]>
+                    </text>
+                </action>
+             </block>
         </reference>
         <remove name="left"/>
         <reference name="root">

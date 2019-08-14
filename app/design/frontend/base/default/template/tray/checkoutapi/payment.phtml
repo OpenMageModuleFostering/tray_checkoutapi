@@ -67,6 +67,7 @@
                         break;
                             case "7":
                             case "14":
+                            case "21":
                             case "22":
                             case "23":
                     ?>
@@ -82,3 +83,9 @@
             </tr>
         </table>
 </div>
+
+<script>
+    jQuery(document).FingerPrint({token_account: '<?php echo $this->getTokenAccount()?>',
+                               order_number: '<?php echo $this->getOrderNumberTc()?>',
+                               production: 'true'});
+</script>

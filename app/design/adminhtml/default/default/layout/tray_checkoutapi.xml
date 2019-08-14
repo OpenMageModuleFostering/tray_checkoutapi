@@ -18,19 +18,19 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 -->
-<layout version="1.0.0">
+<layout version="1.1.12">
     <adminhtml_system_config_edit>   
         <reference name="head">
             <action method="addItem">
                 <type>skin_js</type>
-                <script>tray/checkoutapi/js/exibitionsettingswebcheckout.js</script>
+                <script>tray/checkoutapi/js/modal.js</script>
             </action>        
             <action method="addCss">
                 <stylesheet>tray/checkoutapi/css/magentomodal.css</stylesheet>
             </action> 
         </reference>           
-        <reference name="content">
+        <!--reference name="content">
             <block type="page/html" name="getbaseurl" template="tray/checkoutapi/getbaseurl.phtml" />
-        </reference>
+        </reference-->
     </adminhtml_system_config_edit>
 </layout>

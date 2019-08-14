@@ -3,7 +3,7 @@
     "type": "magento-module",
     "license": "OSL-v3.0",
     "homepage": "",
-    "description": "Extensão Tray Checkout API para Magento",
+    "description": "Extensão TrayCheckout API para Magento",
     "authors": [
     {
         "name": "TrayCheckout",

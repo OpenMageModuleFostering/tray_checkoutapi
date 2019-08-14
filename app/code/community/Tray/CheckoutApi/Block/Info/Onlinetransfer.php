@@ -17,7 +17,7 @@
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Tray_CheckoutApi_Block_Info_Standard extends Mage_Payment_Block_Info
+class Tray_CheckoutApi_Block_Info_Onlinetransfer extends Mage_Payment_Block_Info
 {
     protected function _construct()
     {
@@ -39,8 +39,8 @@ class Tray_CheckoutApi_Block_Info_Standard extends Mage_Payment_Block_Info
             Mage::log(Mage::getModel('checkoutapi/payment')->getPayment(), null, 'traycheckout.log');
             Mage::log('Chamada: ', null, 'traycheckout.log');
             
-            if ($method == "traycheckoutapi" && ($_order->getStatus() == Mage_Sales_Model_Order::STATE_PENDING_PAYMENT )){
-                return '<span>Para efetuar o pagamento, <a href="' . Mage::getBaseUrl() . 'checkoutapi/standard/paymentbackend/order/' . $hash . '">clique aqui</a>.</span>';
+            if ($method == "traycheckoutapi_onlinetransfer" && (($_order->getStatus() == Mage_Sales_Model_Order::STATE_PENDING_PAYMENT ) || ($_order->getStatus() == 'pending' ))){
+                return '<span><button onclick="window.open(\''.$_order->getPayment()->getData('traycheckout_url_payment').'\');" class="button btn-proceed-checkout btn-checkout" title="Efetuar Transfer&ecirc;ncia Online" type="button"><span><span>Efetuar Transfer&ecirc;ncia Online</span></span></button></span>';
             }
         }
     }

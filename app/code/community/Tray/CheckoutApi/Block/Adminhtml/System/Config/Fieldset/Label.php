@@ -21,17 +21,27 @@ class Tray_CheckoutApi_Block_Adminhtml_System_Config_Fieldset_Label extends Mage
 {   
     public function render(Varien_Data_Form_Element_Abstract $element)
     {
-        $id = $element->getHtmlId();
+        $paymentMethod = str_replace(array("payment_","_configButtom"),"",$element->getHtmlId());
+        
+        $paymentMethod = ($paymentMethod == "traycheckoutapi_bankslip") ? "bankslip" : (($paymentMethod == "traycheckoutapi_onlinetransfer") ? "onlinetransfer" : "standard");
+        
+        $configTc = Mage::getSingleton('checkoutapi/'.$paymentMethod);
+        
+        $urlLoja = (Mage::app()->getStore()->isCurrentlySecure()) ? Mage::getUrl('',array("_secure" => true)) : Mage::getBaseUrl();
+
         $html = sprintf('
-            <tr class="system-fieldset-sub-head" id="row_%s">
-                <td colspan="5">
-                    <h4 id="%s">%s</h4>
-                    <p class="note">
-                        <span>%s</span>
-                    </p>
+            <tr id="row_payment_traycheckoutapi_%s">
+                <td class="label">
+                    <label for="payment_traycheckoutapi_%s">%s</label>
                 </td>
-            </tr>',
-            $element->getHtmlId(), $element->getHtmlId(), $element->getLabel(), $element->getComment()
+                <td class="value">
+                    <button type="button" id="%s" name="%s" class="button" onclick="openModalTc(\'http://developers.tray.com.br/authLogin.php?environment=%s&path=%s&type=%s\', \'Configuração TrayCheckout\');openMessagePopup();return false;"> Configurar </button>
+                </td>
+                <td class="scope-label"></td>
+                <td class=""></td>
+            </tr>
+            ',
+            $element->getHtmlId(), $element->getHtmlId(), $element->getLabel(), $element->getHtmlId(), $element->getName(), $configTc->getConfigData("sandbox") ,$urlLoja, $paymentMethod
         );
         
         $html .= <<<HTML

@@ -20,6 +20,7 @@
 class Tray_CheckoutApi_Block_Payment extends Mage_Core_Block_Template
 {
     protected $order_number;
+    protected $order_number_tc;
     protected $transaction_id;
     protected $url_payment;
     protected $typeful_line;
@@ -27,9 +28,13 @@ class Tray_CheckoutApi_Block_Payment extends Mage_Core_Block_Template
     protected $status_name;
     protected $payment_method_id;
     protected $payment_method_name;
+    protected $token_account;
     
     public function getOrderNumber() {
         return $this->order_number;
+    }
+    public function getOrderNumberTc() {
+        return $this->order_number_tc;
     }
     public function getTransactionId() {
         return $this->transaction_id;
@@ -52,6 +57,9 @@ class Tray_CheckoutApi_Block_Payment extends Mage_Core_Block_Template
     public function getPaymentMethodName() {
         return $this->payment_method_name;
     }
+    public function getTokenAccount() {
+        return $this->token_account;
+    }
     
     protected function getPayment()
     {
@@ -59,8 +67,10 @@ class Tray_CheckoutApi_Block_Payment extends Mage_Core_Block_Template
         
         $response = $standard->getTrayCheckoutRequest("/v2/transactions/pay_complete",$standard->getCheckoutFormFields());
         
+        
         $xml = simplexml_load_string($response);
         $this->order_number = str_replace($standard->getConfigData('prefixo'),'',$xml->data_response->transaction->order_number);
+        $this->order_number_tc = $xml->data_response->transaction->order_number;
         $this->transaction_id = $xml->data_response->transaction->transaction_id;
         $this->url_payment = $xml->data_response->transaction->payment->url_payment;
         $this->typeful_line = $xml->data_response->transaction->payment->linha_digitavel;
@@ -68,6 +78,7 @@ class Tray_CheckoutApi_Block_Payment extends Mage_Core_Block_Template
         $this->status_name = $xml->data_response->transaction->status_name;
         $this->payment_method_name = $xml->data_response->transaction->payment->payment_method_name;
         $this->payment_method_id = $xml->data_response->transaction->payment->payment_method_id;
+        $this->token_account = $standard->getConfigData('token');
         
         $standard->updateTransactionTrayCheckout($xml->data_response->transaction);
         

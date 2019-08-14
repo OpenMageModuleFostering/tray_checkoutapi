@@ -33,5 +33,32 @@ class Tray_CheckoutApi_Model_Observer extends Varien_Object
 //            $order->save();
 //        }
     }
+    
+    public function cancelOrderTrayCheckout(Varien_Event_Observer $observer) {
+        $order = $observer->getOrder();
+        
+        $paymentMethod = str_replace(array("payment_","_configButtom"),"",$order->getPayment()->getData('method'));
+        $paymentMethod = ($paymentMethod == "traycheckoutapi_bankslip") ? "bankslip" : (($paymentMethod == "traycheckoutapi_onlinetransfer") ? "onlinetransfer" : "standard");
+        $configTc = Mage::getSingleton('checkoutapi/'.$paymentMethod);
+        
+        $tcAuth = Mage::getModel('checkoutapi/auth');
+        $tcAuth->doAuthorization( $configTc->getConfigData("customerKey"), $configTc->getConfigData("customerSecret"), $configTc->getConfigData("code"), $configTc->getConfigData("sandbox"));
+        
+        $tcRequest = Mage::getModel('checkoutapi/request');
+        
+        $params["access_token"] = $tcAuth->access_token;
+        $params["transaction_id"] = $order->getPayment()->getData("traycheckout_transaction_id");
+        
+        $tcResponse = $tcRequest->requestData("v1/transactions/cancel",$params,$configTc->getConfigData("sandbox"));
+        
+        if($tcResponse->message_response->message == "success"){
+            $order->addStatusToHistory($order->getStatus(), "Pedido Cancelado no TrayCheckout!", false);
+        }else{
+            if ($params["access_token"] != ""){
+                $order->addStatusToHistory($order->getStatus(), "Não foi possível cancelar o pedido: ".$tcResponse->error_response->errors->error[0]->code." - ".$tcResponse->error_response->errors->error[0]->message , false);
+                Mage::throwException("Erro ao Cancelar o Pedido no TrayCheckout: " .$tcResponse->error_response->errors->error[0]->code." - ".$tcResponse->error_response->errors->error[0]->message);    
+            }
+        }        
+    }
 
 }

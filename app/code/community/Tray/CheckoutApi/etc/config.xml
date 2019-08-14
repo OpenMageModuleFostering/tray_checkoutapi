@@ -11,7 +11,7 @@
  * http://opensource.org/licenses/osl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
- * to suporte@tray.net.br so we can send you a copy immediately.
+ * to suporte@tray.net.br so we can send you a copy immediately. 
  *
  * @category   Tray
  * @package    Tray_CheckoutApi
@@ -21,7 +21,7 @@
 <config>
     <modules>
         <Tray_CheckoutApi>
-            <version>0.7.0</version>
+            <version>1.1.12</version>
         </Tray_CheckoutApi>
     </modules>
     <global>
@@ -29,6 +29,7 @@
             <checkoutapi>
                 <class>Tray_CheckoutApi_Model</class>
                 <resourceModel>checkoutapi_mysql4</resourceModel>
+                <resourceModel>checkoutapi_resource</resourceModel>
             </checkoutapi>
             <checkoutapi_mysql4>
                 <class>Tray_CheckoutApi_Model_Mysql4</class>
@@ -38,6 +39,14 @@
                     </api_debug>
                 </entities>
             </checkoutapi_mysql4>
+            <checkoutapi_eav>
+                <class>Tray_CheckoutApi_Model_Resource</class>
+                <entities>
+                    <payment>
+                        <table>sales_flat_order_payment</table>
+                    </payment>
+                </entities>
+            </checkoutapi_eav>
         </models>
         <resources>
             <checkoutapi_setup>
@@ -88,6 +97,15 @@
                     </checkoutapi_observer>
                 </observers>
             </checkout_multishipping_controller_success_action>
+            <order_cancel_after>
+                <observers>
+                    <checkoutapi_observer>
+                        <type>singleton</type>
+                        <class>checkoutapi/observer</class>
+                        <method>cancelOrderTrayCheckout</method>
+                    </checkoutapi_observer>
+                </observers>
+            </order_cancel_after>
         </events>
         <fieldsets>
              <sales_convert_quote_payment>
@@ -168,8 +186,21 @@
                   <order_status>pending</order_status>
                   <title>TrayCheckout</title>
                   <allowspecific>1</allowspecific>
-                  <splitTax>1.99</splitTax>
             </traycheckoutapi>
+            <traycheckoutapi_bankslip>
+                  <active>0</active>
+                  <model>Tray_CheckoutApi_Model_Bankslip</model>
+                  <order_status>pending</order_status>
+                  <title>TrayCheckout - Boleto Bancário</title>
+                  <allowspecific>1</allowspecific>
+            </traycheckoutapi_bankslip>
+            <traycheckoutapi_onlinetransfer>
+                  <active>0</active>
+                  <model>Tray_CheckoutApi_Model_Onlinetransfer</model>
+                  <order_status>pending</order_status>
+                  <title>TrayCheckout - Transferência Online</title>
+                  <allowspecific>1</allowspecific>
+            </traycheckoutapi_onlinetransfer>
         </payment>
         <checkoutapi>
             <settings>

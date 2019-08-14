@@ -16,15 +16,21 @@
  * @package    Tray_CheckoutApi
  * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-?>
-<fieldset class="form-list">
+?>       
+<p>
+    <strong>
+        <?php echo $this->htmlEscape($this->getMethod()->getTitle()) ?>
+    </strong>
+    <br/>
     <?php 
-          $_code = $this->getMethodCode();
-          $_standardPD = Mage::getSingleton('checkoutapi/standard');
-          
-          $totals = Mage::getSingleton('adminhtml/session_quote')->getQuote()->collectTotals();  
+        if($this->getInfo()->getData("cc_type") != NULL){
+            $tcTxtPaymentMethod = array("Boleto Bancário","Itaú Shopline","Peela","Transf. Online HSBC","Transf. Online Bradesco","Transf. Online Banco do Brasil");
+            $tcIdPaymentMethod = array("6","7","14","21","22","23");
+
+            echo $tcTxtPaymentMethod[array_search($this->getInfo()->getData("cc_type"), $tcIdPaymentMethod)];
+        } 
     ?>
-    <ul id="payment_form_<?php echo $_code ?>" style="display:none">
-        <ul class="forma_pagamento"></ul>
-    </ul>
-</fieldset>
+</p>
+<?php echo $this->getLinkPayment($this->getInfo()->getOrder()); ?>
+
+
