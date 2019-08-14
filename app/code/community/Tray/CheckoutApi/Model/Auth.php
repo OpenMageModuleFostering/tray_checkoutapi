@@ -34,7 +34,11 @@ class Tray_CheckoutApi_Model_Auth extends Varien_Object
         
         $tcRequest = Mage::getModel('checkoutapi/request');
         
+        Mage::log($params, null, 'traycheckout.log');
+
         $tcResponse = $tcRequest->requestData($this->urlAccessToken,$params,$environment);
+        
+        Mage::log($tcResponse, null, 'traycheckout.log');
         
         if($tcResponse->message_response->message == "success"){
             $this->access_token = $tcResponse->data_response->authorization->access_token;

@@ -38,6 +38,8 @@ class Tray_CheckoutApi_Model_Bankslip extends Tray_CheckoutApi_Model_Standard
     
     protected $errorTypeErrorTrayCheckout = '';
     
+    protected $notification  = 'bankslip';
+    
     /**
      *  Return Order Place Redirect URL
      *

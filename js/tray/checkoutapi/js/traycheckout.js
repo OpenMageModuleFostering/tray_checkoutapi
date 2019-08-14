@@ -99,7 +99,7 @@ function getSplitValues(pPrice, pMethod, pathM){
     
     if (pMethod != ""){
         document.getElementById('traycheckoutapi_split').innerHTML = "<option value=\"\">Carregando ...</option>";
-        var data_file = pathM+"checkoutapi/standard/getsplit/price/"+pPrice+"/method/"+pMethod;
+        var data_file = pathM+"checkoutapi/standard/getsplit/price/"+pPrice+"/method/"+pMethod+"/type/standard/";
 
         var http_request = new XMLHttpRequest();
         try{

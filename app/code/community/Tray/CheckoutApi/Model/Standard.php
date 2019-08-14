@@ -38,6 +38,7 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
     
     protected $errorTypeErrorTrayCheckout = '';
     
+    protected $notification  = 'standard';
     /**
      * Availability options
      */
@@ -128,6 +129,7 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         if (!($data instanceof Varien_Object)) {
             $data = new Varien_Object($data);
         }
+        //var_dump($data->getCcType());
         $info = $this->getInfoInstance();
         $info->setCcType($data->getCcType())
              ->setCcOwner($data->getCcOwner())
@@ -285,6 +287,7 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         
         $ccType = $quote->getPayment()->getData('cc_type');
         $ccNumber = $quote->getPayment()->getData('cc_number');
+        //var_dump($quote->getPayment()->getData());
         if(!in_array($ccType, array("2","6","7","14","22","23"))){
             if ($this->validateCcNum($ccNumber)) {
                 switch ($ccType){
@@ -409,8 +412,8 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
             $type_contact = "W";
         }
         
-	$sArr['token_account']= $this->getConfigData('token');
-	$sArr['transaction[free]']= "MAGENTO_API_v".(string) Mage::getConfig()->getNode()->modules->Tray_CheckoutApi->version;
+	    $sArr['token_account']= $this->getConfigData('token');
+	    $sArr['transaction[free]']= "MAGENTO_API_v".(string) Mage::getConfig()->getNode()->modules->Tray_CheckoutApi->version;
         $sArr['transaction[order_number]']= $this->getConfigData('prefixo').$orderIncrementId;
 
     	$sArr['customer[name]']= $order->getData("customer_firstname") . ' ' . str_replace("(pj)", "", $order->getData("customer_lastname"));
@@ -464,8 +467,14 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         
         $sArr['transaction[url_process]'] = Mage::getUrl('checkoutapi/standard/return',  array('_secure' => true));
         $sArr['transaction[url_success]'] = Mage::getUrl('checkoutapi/standard/return', array('_secure' => true));
-        $sArr['transaction[url_notification]'] = Mage::getUrl('checkoutapi/standard/success', array('_secure' => true, 'type' => 'standard'));
+        $sArr['transaction[url_notification]'] = Mage::getUrl('checkoutapi/standard/success', array('_secure' => true, 'type' => $notification));
         
+        //Exemplo de Afiliados
+        //$sArr['affiliates[0][account_email]'] = 'emailaffiliate1@devtray.com.br';
+        //$sArr['affiliates[0][percentage]'] = '20';
+        //$sArr['affiliates[1][account_email]'] = 'emailaffiliate2@devtray.com.br';
+        //$sArr['affiliates[1][percentage]'] = '15';
+                
         $sArr['payment[payment_method_id]'] = $order->getPayment()->getData('cc_type');
         $sArr['payment[split]'] = (($order->getPayment()->getData('traycheckout_split_number') == NULL)|| ($order->getPayment()->getData('traycheckout_split_number') == '0') ? '1' : $order->getPayment()->getData('traycheckout_split_number'));
         $sArr['payment[card_name]'] = $order->getPayment()->getData('cc_owner');
@@ -544,10 +553,29 @@ class Tray_CheckoutApi_Model_Standard extends Mage_Payment_Model_Method_Abstract
         $ch = curl_init ( $this->getTrayCheckoutUrl().$url );
         
         if(is_array($params)){
-            Mage::log('Data: '. http_build_query($params), null, 'traycheckout.log');
-        }else{
-            Mage::log('Data: '.  $params, null, 'traycheckout.log');
+            $params = http_build_query($params);
         }
+        //Mage::log('Data: '.  $params, null, 'traycheckout.log');
+        $patterns = array();
+        $patterns[0] = '/card_name%5D=[\w\W]*&payment%5Bcard_number/';
+        $patterns[1] = '/card_number%5D=\d+\D/';
+        $patterns[2] = '/card_expdate_month%5D=\d+\D/';
+        $patterns[3] = '/card_expdate_year%5D=\d+\D/';
+        $patterns[4] = '/card_cvv%5D=\d+/';
+        $replacements = array();
+        $replacements[0] = 'card_name%5D=&payment%5Bcard_number';
+        $replacements[1] = 'card_number%5D=';
+        $replacements[2] = 'card_expdate_month%5D=';
+        $replacements[3] = 'card_expdate_year%5D=';
+        $replacements[4] = 'card_cvv%5D=';
+
+        //$arrayp = array('%5B0%5D','%5B1%5D','%5B2%5D','%5B3%5D','%5B4%5D','%5B5%5D','%5B6%5D','%5B7%5D','%5B8%5D','%5B9%5D');
+        //$replace = ;
+        
+        $params = preg_replace('/%5B\d{1,3}%5D/', '%5B%5D', $params);
+        //$params = str_replace($arrayp, $replace, $params);
+        
+        Mage::log('Data: '.  preg_replace($patterns, $replacements,$params), null, 'traycheckout.log');
         
         curl_setopt ( $ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1 );
         curl_setopt ( $ch, CURLOPT_POST, 1 );

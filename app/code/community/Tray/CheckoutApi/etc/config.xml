@@ -21,7 +21,7 @@
 <config>
     <modules>
         <Tray_CheckoutApi>
-            <version>1.1.6</version>
+            <version>1.2.0</version>
         </Tray_CheckoutApi>
     </modules>
     <global>
@@ -106,6 +106,15 @@
                     </checkoutapi_observer>
                 </observers>
             </order_cancel_after>
+            <sales_order_shipment_save_after>
+                <observers>
+                    <checkoutapi_observer>
+                        <type>singleton</type>
+                        <class>checkoutapi/observer</class>
+                        <method>shipmentTrayCheckout</method>
+                    </checkoutapi_observer>
+                </observers>
+            </sales_order_shipment_save_after>
         </events>
         <fieldsets>
              <sales_convert_quote_payment>

@@ -27,6 +27,8 @@ class Tray_CheckoutApi_Block_Adminhtml_System_Config_Fieldset_Label extends Mage
         
         $configTc = Mage::getSingleton('checkoutapi/'.$paymentMethod);
         
+        $urlLoja = (Mage::app()->getStore()->isCurrentlySecure()) ? Mage::getUrl('',array("_secure" => true)) : Mage::getBaseUrl();
+
         $html = sprintf('
             <tr id="row_payment_traycheckoutapi_%s">
                 <td class="label">
@@ -39,7 +41,7 @@ class Tray_CheckoutApi_Block_Adminhtml_System_Config_Fieldset_Label extends Mage
                 <td class=""></td>
             </tr>
             ',
-            $element->getHtmlId(), $element->getHtmlId(), $element->getLabel(), $element->getHtmlId(), $element->getName(), $configTc->getConfigData("sandbox") ,Mage::getBaseUrl(), $paymentMethod
+            $element->getHtmlId(), $element->getHtmlId(), $element->getLabel(), $element->getHtmlId(), $element->getName(), $configTc->getConfigData("sandbox") ,$urlLoja, $paymentMethod
         );
         
         $html .= <<<HTML

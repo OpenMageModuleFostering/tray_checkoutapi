@@ -38,6 +38,7 @@ class Tray_CheckoutApi_Model_Onlinetransfer extends Tray_CheckoutApi_Model_Stand
     
     protected $errorTypeErrorTrayCheckout = '';
     
+    protected $notification  = 'onlinetransfer';
     /**
      *  Return Order Place Redirect URL
      *

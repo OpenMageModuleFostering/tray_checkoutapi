@@ -88,7 +88,7 @@
                     ?>
                         <li class="tcPaymentMethod" >
                             <!--input type="radio" name="tcPaymentMethodR" value="<?php echo $idTcPayment;?>" onclick="document.getElementById('tcPaymentMethod').value = this.value;"/-->
-                            <img src="<?php echo $this->getSkinUrl('tray/checkoutapi/images/'.$imgSrc.'-flag.svg') ?>" class="tcPaymentFlag" id="tcPaymentFlag<?php echo $idTcPayment;?>" onclick="selectCreditCardTc('<?php echo $idTcPayment;?>','<?php echo number_format((float)$totals->grand_total, 2, '.',''); ?>','<?php echo Mage::getBaseUrl();?>')">
+                            <img src="<?php echo $this->getSkinUrl('tray/checkoutapi/images/'.$imgSrc.'-flag.svg') ?>" class="tcPaymentFlag" id="tcPaymentFlag<?php echo $idTcPayment;?>" onclick="selectCreditCardTc('<?php echo $idTcPayment;?>','<?php echo number_format((float)$totals->grand_total, 2, '.',''); ?>','<?php echo (Mage::app()->getStore()->isFrontUrlSecure())?Mage::getUrl('',array("_secure" => true)):Mage::getBaseUrl();?>')">
                         </li>
                     <?php
                         }
@@ -105,10 +105,10 @@
                         <input type="text" title="<?php echo Mage::helper('payment')->__('Name on Card') ?>" class="required-entry input-text" id="<?php echo $_code ?>_cc_owner" name="payment[cc_owner]" value="<?php echo $this->getInfoData('cc_owner') ?>"/>
                     </div>
                 </li>
-                <li>
+                <li>                   
                     <div class="input-box">
                         <label for="<?php echo $_code ?>_cc_number"><?php echo Mage::helper('payment')->__('Credit Card Number') ?> <span class="required">*</span></label><br/>
-                        <input type="text" id="<?php echo $_code ?>_cc_number" name="payment[cc_number]" title="<?php echo Mage::helper('payment')->__('Credit Card Number') ?>" class="required-entry input-text validate-cc-number" value="<?php echo $this->getInfoData('cc_number')?>" onkeyup="identifyCreditCardTc(this.value)" onblur="getSplitValues('<?php echo number_format((float)$totals->grand_total, 2, '.',''); ?>',document.getElementById('tcPaymentMethod').value,'<?php echo Mage::getBaseUrl();?>')"/>
+                        <input type="text" id="<?php echo $_code ?>_cc_number" name="payment[cc_number]" title="<?php echo Mage::helper('payment')->__('Credit Card Number') ?>" class="required-entry input-text validate-cc-number" value="<?php echo $this->getInfoData('cc_number')?>" onkeyup="identifyCreditCardTc(this.value.replace(/ /g,''))" onblur="getSplitValues('<?php echo number_format((float)$totals->grand_total, 2, '.',''); ?>',document.getElementById('tcPaymentMethod').value,'<?php echo (Mage::app()->getStore()->isFrontUrlSecure())?Mage::getUrl('',array("_secure" => true)):Mage::getBaseUrl();?>')"/>
                     </div>
                 </li>
                 <li>

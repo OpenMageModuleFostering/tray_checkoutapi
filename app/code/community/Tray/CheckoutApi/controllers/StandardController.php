@@ -51,6 +51,8 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
         
         $tcRequest = Mage::getModel('checkoutapi/request');
         
+        //Mage::log($tcAuth, null, 'traycheckout.log');
+
         $params["access_token"] = $tcAuth->access_token;
         $params["url"] = Mage::getBaseUrl();
         //var_dump($code,$customerKey,$customerSecret,$environment);
@@ -205,7 +207,7 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
         $_type = $this->getRequest()->getParam('type', false);
         $token = $this->getApi()->getConfigData('token');
 
-	$urlPost = $this->getUrlPostCheckoutApi($this->getApi()->getConfigData('sandbox'));
+	    $urlPost = $this->getUrlPostCheckoutApi($this->getApi()->getConfigData('sandbox'));
 
         $dados_post = $this->getRequest()->getPost();
          
@@ -288,10 +290,11 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
             $transaction = $arrResponse['data_response']['transaction'];
             $order_number = str_replace($this->getApi()->getConfigData('prefixo'),'',$transaction['order_number']);
             $order = Mage::getModel('sales/order');
+            $prefixo123 = $this->getApi()->getConfigData('prefixo');
 
             $order->loadByIncrementId($order_number);
             
-            echo "Pedido: $order_number - ID: ".$transaction['transaction_id'];
+            echo "Prefixo: $prefixo123 | Pedido: $order_number - ID: ".$transaction['transaction_id'];
             
             if ($order->getId()) {
 
@@ -309,6 +312,8 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
                     $cod_status = $transaction['status_id'];
                     
                     $comment = $cod_status . ' - ' . $transaction['status_name'];
+
+                    $cod_status = 6;
                     switch ($cod_status){
                         case 4: 
                         case 5:
@@ -388,10 +393,10 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
                                     
                                     $order->addStatusToHistory(
                                             Mage_Sales_Model_Order::STATE_PROCESSING, 
-                                            Mage::helper('checkoutapi')->__($frase), true
+                                            Mage::helper('checkoutapi')->__($frase), false
                                     );
 
-                                    $order->sendOrderUpdateEmail(true, $frase);
+                                    //$order->sendOrderUpdateEmail(true, $frase);
                                     
                                 }
                             //}
@@ -429,6 +434,8 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
     {
         $tcStandard = Mage::getModel('checkoutapi/standard');
         
+        Mage::log('Split Request: '.  $tcStandard->getConfigData('token'), null, 'traycheckout.log');
+        
         $params = array(
             "token_account" => $tcStandard->getConfigData('token'),
             "price" => $this->getRequest()->getParam('price', false)
@@ -436,7 +443,7 @@ class Tray_CheckoutApi_StandardController extends Mage_Core_Controller_Front_Act
         
         $method =  $this->getRequest()->getParam('method', false);
         
-        $tcResponse = simplexml_load_string($tcStandard->getTrayCheckoutRequest("/edge/transactions/simulate_splitting",$params));
+        $tcResponse = simplexml_load_string($tcStandard->getTrayCheckoutRequest("/v1/transactions/simulate_splitting",$params));
         
         foreach ($tcResponse->data_response->payment_methods->payment_method as $payment_method){
             if(intval($payment_method->payment_method_id) == intval($method)){
